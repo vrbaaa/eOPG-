@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+{% block body %}
+        {% if offer %}
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <h2>ORIGINALNI OGLAS</h2>
+                <br>
+                <h2>{{offer.naziv}}</h2>
+                <p>Cijena: {{offer.cijena}}</p>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <p>Proizvod: {{offer.proizvod}}</p>
+                <p>Količina: {{offer.kolicina}}</p>
+                <p>Prijevoz: {{offer.prijevoz}}</p>
+            </div>
+        </div>
+        <hr>
+        <hr>
+        {% endif %}
+            <h1>PROTUPONUDE : </h1>
+            <br>
+            
+            <div class="row">
+            {% for protuponuda in protuponude %}
+                <div class="modal fade" id="odbijModal{{ protuponuda._id }}" tabindex="-1" role="dialog" aria-labelledby="odbijModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="odbijModalLabel">Odbijanje protuponude</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Jeste li sigurni da želite odbiti ovu ponudu?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                                <a class="btn btn-primary" id="down" href="{{url_for('centri.odbijProtuponuduCentar', protuponuda_id = protuponuda._id)}}"><i class="fas fa-check"></i> Prihvati oglas </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="prihvatiModal{{ protuponuda._id }}" tabindex="-1" role="dialog" aria-labelledby="prihvatiModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form action="{{url_for('centri.prihvatiProtuponuduCentar', protuponudaZaCentar_id = protuponuda._id)}}" method=POST>
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="prihvatiModalLabel">Jeste li sigurni da želite prihvatiti protuponudu?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                            Prihvaćanjem ove protuponude, ažurirat će se količina na vašem aktivnom oglasu
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                        <input type="submit" value="Pošalji protuponudu">
+                        </div>
+                        </form>
+                    </div>
+                    </div>
+                </div>
+
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-body">
+                                <div class="col">
+                                    <h2>OPG : {{protuponuda.user_id}}</h2>
+                                    <p>Cijena : {{protuponuda.cijena}}</p>
+                                </div>
+                                <div class="col">
+                                    <p>Količina : {{protuponuda.kolicina}}</p>
+                                    <p>Transport : {{protuponuda.prijevoz}}</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="uredi" data-toggle="modal" data-target="#odbijModal{{ protuponuda._id }}">Odbij protuponudu</button>
+                                        <button type="button" class="btn btn-sm btn-outline-success" id="down" data-toggle="modal" data-target="#prihvatiModal{{ protuponuda._id }}"><i class="fas fa-check"></i> Prihvati protuponudu</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            {% endfor %}
+        </div>
+
+{% endblock %}

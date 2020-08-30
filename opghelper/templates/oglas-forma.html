@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+        <form  method=POST action="">
+            <fieldset class="form-group">
+                <div class="form-group">
+                    <input type="text" class="unos" placeholder="naziv oglasa" name="nazivOglasa">
+                </div>
+            <input type="number" placeholder="okvirna količina" name="kolicina">
+            <input type="number" placeholder="željena cijena" name="cijena">
+            <label for="vrste">Odaberite vrste proizvoda: </label>
+            <select name="vrste" id="vrste">
+                {% for product in products %}
+                    <option value="{{product.name}}">{{product.name}}</option>
+                {% endfor %}
+            </select>
+            <input type="text" class="unos" placeholder="sorta" name="sorta">
+            <label for="prijevoz">Odaberite vrste prijevoza: </label>
+            <select name="prijevoz" id="prijevoz">
+                    <option value="vlastiti">Vlastiti</option>
+                    <option value="centar">Centar</option>
+            </select>
+            <label for="datum">Datum prodaje:</label>
+            <input type="date" id="datum" name="datum">
+            <input type="submit" value="Dodaj oglas">
+            </fieldset>
+
+        </form>
+{% endblock %}

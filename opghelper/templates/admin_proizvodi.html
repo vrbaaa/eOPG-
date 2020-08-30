@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+{% block body %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{category}}">
+                    {{message}}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="modal fade" id="dodajNoviProizvodModal" tabindex="-1" role="dialog" aria-labelledby="dodajNoviProizvodModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form action="" method=POST>
+            <div class="modal-header">
+              <h5 class="modal-title" id="dodajNoviProizvodModalLabel">Dodaj novi proizvod</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                {{form.csrf_token}}
+                <fieldset class="form-group">
+                    <div class="form-group">
+                        {{ form.name.label(class="form-control-label") }}
+                        {% if form.name.errors %}
+                            {{ form.name(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.name(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                       {{ form.type.label(class="form-control-label") }}
+                       {% if form.type.errors %}
+                       {{ form.type(class="form-control is-invalid") }}
+                       <div class="invalid-feedback">
+                           {% for error in form.type.errors %}
+                               <span>{{error}}</span>
+                           {% endfor %}
+                       </div>
+                   {% else %}
+                       {{ form.type(class="form-control ") }}
+                   {% endif %}
+                   </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+              <input type="submit" value="Dodaj proizvod">
+            </div>
+            </form>
+          </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-success" id="dodaj" data-toggle="modal" data-target="#dodajNoviProizvodModal">Dodaj novi proizvod</button>
+    <br><br>
+    <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Naziv proizvoda</th>
+            <th scope="col">Vrsta proizvoda</th>
+            <th scope="col">Količina prodana</th>
+            <th scope="col">Uredi</th>
+          </tr>
+        </thead>
+        <tbody>
+            {%for proizvod in proizvodi %}
+            <div class="modal fade" id="urediModal{{ proizvod._id }}" tabindex="-1" role="dialog" aria-labelledby="urediModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <form action="{{url_for('admin.uredi_proizvod', pid = proizvod._id)}}" method=POST>
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="urediModalLabel">Uredi proizvod</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        <fieldset class="form-group">  
+                            <div class="form-group">
+                                <label for="naziv" class="form-control-label">Naziv: </label> <br>
+                                <input type="text" class="form-control" name="name" id="name" value="{{proizvod.name}}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-control-label" for="vrsta">Vrsta: </label> <br>
+                                {% if proizvod.type == 'voće' %}
+                                    <input type="radio" id="povrće" name="vrsta" value="povrće">
+                                    <label for="povrće">povrće</label>
+                                    <input type="radio" id="voće" name="vrsta" value="voće" checked="true">
+                                    <label for="opg">voće</label><br>
+                                    {% else %}
+                                    <input type="radio" id="povrće" name="vrsta" value="povrće" checked="true">
+                                    <label for="povrće">povrće</label>
+                                    <input type="radio" id="voće" name="vrsta" value="voće" >
+                                    <label for="voće">voće</label><br>
+                                {% endif %}
+                           </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                      <input type="submit" value="Dodaj proizvod">
+                    </div>
+                    </form>
+                  </div>
+                </div>
+            </div>
+                <tr>
+                    <td>{{proizvod.name}}</td>
+                    <td>{{proizvod.type}}</td>
+                    {% if proizvod.name in kupljeniProizvodi %}
+                        {%for p in producti %}
+                            {% if p._id == proizvod.name%}
+                            <td>{{p.total}}</td>
+                            {% endif %}   
+                        {% endfor %}
+                        {% else %}
+                        <td>Jos nije kupljen</td>
+                    {% endif %}   
+                    <td><button type="button" class="btn btn-primary" id="uredi" data-toggle="modal" data-target="#urediModal{{ proizvod._id }}">Uredi proizvod</button></td>
+                </tr>   
+            {% endfor %}
+        </tbody>
+      </table>
+      
+{% endblock %}

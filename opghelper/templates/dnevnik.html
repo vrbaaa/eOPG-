@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block body %}
+    <form class="" action="admin_search" method="GET">
+        <label class="form-control-label" for="radnja">Pretraži po radnji: </label>
+        <select name="radnja" class="form-control" name="radnja" id="radnja">
+            {% if rad == 'Sve radnje' %}
+                <option  selected value="Sve radnje">Sve radnje</option>
+                {% for radnja in radnje %}
+                    <option value="{{radnja}}">{{radnja}}</option>
+                {% endfor %}
+            {% else %}
+               <option value="Sve radnje">Sve radnje</option>
+               {% for radnja in radnje %}
+                    {% if rad == radnja%}
+                        <option selected value="{{radnja}}">{{radnja}}</option>
+                    {% else %}
+                        <option value="{{radnja}}">{{radnja}}</option>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </select>
+        <select name="korisnik" class="form-control" name="korisnik" id="korisnik">
+            {% if kor == 'Svi korisnici' %}
+                <option  selected value="Svi korisnici">Svi korisnici</option>
+                {% for korisnik in korisnici %}
+                    <option value="{{korisnik.username}}">{{korisnik.username}}</option>
+                {% endfor %}
+            {% else %}
+               <option value="Svi korisnici">Svi korisnici</option>
+                {% for korisnik in korisnici %}
+                    {% if kor == korisnik.username%}
+                        <option selected value="{{korisnik.username}}">{{korisnik.username}}</option>
+                    {% else %}
+                        <option value="{{korisnik.username}}">{{korisnik.username}}</option>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </select>
+        <input type="submit">
+    </form>
+
+    <div class="table-responsive-sm">
+        <table class="table">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">Korisničko ime</th>
+                <th scope="col">Radnja</th>
+                <th scope="col">Vrijeme</th>
+            </tr>
+            </thead>
+            <tbody>
+                {%for d in dnevnik %}
+                    <tr>
+                        <td>{{d.korisnik}}</a></td>
+                        <td>{{d.radnja}}</td>
+                        <td>{{d.vrijeme.strftime('%d.%m.%Y. %H:%M:%S')}}</td>
+                    </tr>   
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

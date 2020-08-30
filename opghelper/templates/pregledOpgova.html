@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% block body %}
+        <table class="table">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Slika</th>
+                <th scope="col">Naziv OPG-a</th>
+                <th scope="col">Adresa</th>
+                <th scope="col">Odrađenih međusobnih poslova</th>
+                <th scope="col">Prosječna ocjena</th>
+                <th scope="col">Ocijeni korisnika</th>
+                <th scope="col">Pošalji poruku centru</th>
+              </tr>
+            </thead>
+            <tbody>
+                {%for centar in centri %}
+                <div class="modal fade" id="ocjeniModal{{centar._id}}" tabindex="-1" role="dialog" aria-labelledby="ocjeniModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <form action="{{url_for('centri.ocijeniOpg', opg_id = centar._id)}}" method=POST>
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="ocjeniModalLabel">Ocijeni opg</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                            {% for ocjena in ocjene %}
+                                {% if ocjena.id == centar._id %} 
+                                    {% if ocjena.brojPoslova == 0 %}
+                                        <strong> Ne možete ocjeniti centar jer nemate zajedničkih poslova</strong>
+                                    {% endif %}
+                                    {% if ocjena.brojPoslova > 0 and session['username'] in ocjena.useri %}
+                                        <strong> Već ste ocjenili ovaj OPG</strong>
+                                    {% endif %}
+                                    {% if ocjena.brojPoslova > 0 and session['username'] not in ocjena.useri %}
+                                        <p>Ocjenite centar ocjenom od 1 do 5</p>
+                                        <p>{{centar._id}}</p>
+                                        <input type="number" id="ocjena" name="ocjena">
+                                    {% endif %}
+                                {% endif %} 
+                            {% endfor %}
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                            {% for ocjena in ocjene %}
+                                {% if ocjena.id == centar._id %} 
+                                    {% if ocjena.brojPoslova > 0 and session['username'] not in ocjena.useri %}
+                                      <input type="submit" class="btn btn-primary" value="Ocijeni centar" id="down"></input>
+                                    {% endif %}
+                                {% endif %} 
+                            {% endfor %}
+                        </div>
+                      </div>
+                    </form>
+                    </div>
+                  </div>
+                    <tr>
+                        <td><img class="rounded-circle account-img" src="{{url_for('static', filename='images/' + centar.picture)}}"></td>
+                        <td>{{centar.username}}</td>
+                        <td>{{centar.adress.opcina}}, {{centar.adress.ulica}} {{centar.adress.kbr}}</td>
+                        {% for ocjena in ocjene %}
+                            {% if ocjena.username == centar.username %}
+                                <td>{{ocjena.brojPoslova}}</td>
+                                <td>{{ocjena.avg}}</td>
+                            {%else%}
+                            {% endif %}
+                            {% if ocjena.brojPoslova == 0 %}
+                            {% endif %}
+                        {% endfor %}
+                                <td>
+                                    <button type="button" class="btn btn-secondary" id="uredi" data-toggle="modal" data-target="#ocjeniModal{{ centar._id }}">Ocijeni</button>
+                                </td>
+                              <td><a onclick="stisnut()" href="{{url_for('centri.posaljiPoruku', opg = centar.username)}}"> Pošalji poruku</a></td>
+                    </tr>   
+                {% endfor %}
+            </tbody>
+          </table>
+
+{% endblock %}

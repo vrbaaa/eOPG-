@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block body %}
+        <div class="row">
+            <label class="form-control-label" for="proizvod">Pretraži po Proizvodu: </label>
+            <select name="proizvod" class="form-control" id="proizvod" onchange="chan()">
+                <option selected value="sviProizvodi">Svi proizvodi</option>
+                {% for product in products %}
+                <option value="{{product.name}}">{{product.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    <br>
+        {% for offer in offers %}
+            <div class="modal fade" id="prihvatiModal{{ offer._id }}" tabindex="-1" role="dialog" aria-labelledby="prihvatiModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="prihvatiModalLabel">Prihvaćanje oglasa</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Jeste li sigurni da želite odabrati ovu ponudu? {{offer.offerTitle}}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                            <a class="btn btn-primary" id="down" href="{{url_for('prihvatiOglas', offer_id = offer._id)}}"><i class="fas fa-check"></i> Prihvati oglas </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="protuponudaModal{{ offer._id }}" tabindex="-1" role="dialog" aria-labelledby="protuponudaModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <form action="{{url_for('posaljiProtuponudu', offer_id = offer._id)}}" method=POST>
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="protuponudaModalLabel">Napravi protuponudu za ovaj oglas</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" name="wantedPrice" id="wantedPrice" value="{{offer.wantedPrice}}">
+                        <input type="text" name="quantity" id="quantity" value="{{offer.quantity}}">
+                        <input type="text" name="transport" id="transport" value="{{offer.transport}}">
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                      <input type="submit" value="Pošalji protuponudu">
+                    </div>
+                    </form>
+                  </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <h2>{{offer.offerTitle}}</h2>
+                    <h3>OPG : {{offer.user_id}}</h3>
+                    <p>Cijena: {{offer.wantedPrice}}</p>
+                </div>
+                <div class="col">
+                    <p>Proizvod: {{offer.product}}</p>
+                    <p>Količina: {{offer.quantity}}</p>
+                    <p>Prijevoz: {{offer.transport}}</p>
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-secondary" id="uredi" data-toggle="modal" data-target="#protuponudaModal{{ offer._id }}">Protuponuda</button>
+                    <button type="button" class="btn btn-primary" id="down" data-toggle="modal" data-target="#prihvatiModal{{ offer._id }}"><i class="fas fa-check"></i>Prihvati oglas</button>
+                </div>
+            </div>
+            <hr>
+        {% endfor %}
+{% endblock %}
+
+{%block script%}
+
+<script>
+    function chan() {
+        $.ajax({
+			url: '/oglasiOpgova',
+			data: $("#proizvod").val(),
+			type: 'POST',
+			success: function(response){
+				console.log(response);
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
+    }
+</script>
+
+{% endblock %}

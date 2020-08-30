@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="lefter">
+        <div class="sidebar">
+            <h2>sdad</h2>
+            <ul>
+                {% if type == 'centar' %}
+                    <li><a href="{{ url_for('') }}"><i class="fas fa-home"></i>Početna</a></li>
+                    <li><a href="#"><i class="fas fa-user"></i>Profil</a></li>
+                    <li><a href="#"><i class="fas fa-address-card"></i>Predaj oglas</a></li>
+                    <li><a href="#"><i class="fas fa-project-diagram"></i>Pretraga oglasa</a></li>
+                    <li><a href="#"><i class="fas fa-blog"></i>Moji oglasi</a></li>
+                    <li><a href="#"><i class="fas fa-address-book"></i>Povijest kupnje</a></li>
+                    <li><a href="#"><i class="fas fa-map-pin"></i>Map</a></li>
+                    <a class="btn btn-danger" id="down" href="{{url_for('logout')}}"> Odjavi se </a>
+                {% endif %}
+                {% if type == 'opg' %}
+                    <li><a href="{{ url_for('') }}">><i class="fas fa-home"></i>Početna</a></li>
+                    <li><a href="#"><i class="fas fa-user"></i>Profil</a></li>
+                    <li><a href="{{ url_for('login') }}"><i class="fas fa-address-card"></i>Predaj ponudu</a></li>
+                    <li><a href="#"><i class="fas fa-project-diagram"></i>Pretraga oglasa</a></li>
+                    <li><a href="#"><i class="fas fa-blog"></i>Moji oglasi</a></li>
+                    <li><a href="#"><i class="fas fa-address-book"></i>Povijest kupnje</a></li>
+                    <li><a href="#"><i class="fas fa-map-pin"></i>Map</a></li>
+                    <a class="btn btn-danger" href="{{url_for('logout')}}"> Odjavi se </a>
+                {% endif %}
+            </ul> 
+        </div>
+    </div>
+    {% block content %} {% endblock %}
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block body %}
+<form class="" action="povSearch" method="GET">
+    <label class="form-control-label" for="proizvod">Pretraži </label>
+    <select name="proizvod" class="form-control" name="proizvod" id="proizvod">
+        {% if pro == 'Svi proizvodi' %}
+            <option  selected value="Svi proizvodi">Svi proizvodi</option>
+            {% for proizvod in proizvodi %}
+                <option value="{{proizvod.name}}">{{proizvod.name}}</option>
+            {% endfor %}
+        {% else %}
+           <option value="Svi proizvodi">Svi proizvodi</option>
+           {% for proizvod in proizvodi %}
+                {% if pro == proizvod.name%}
+                    <option selected value="{{proizvod.name}}">{{proizvod.name}}</option>
+                {% else %}
+                    <option value="{{proizvod.name}}">{{proizvod.name}}</option>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </select>
+    <select name="korisnik" class="form-control" name="korisnik" id="korisnik">
+        {% if kor == 'Svi korisnici' %}
+            <option  selected value="Svi korisnici">Svi korisnici</option>
+            {% for korisnik in korisnici %}
+                <option value="{{korisnik.username}}">{{korisnik.username}}</option>
+            {% endfor %}
+        {% else %}
+           <option value="Svi korisnici">Svi korisnici</option>
+            {% for korisnik in korisnici %}
+                {% if kor == korisnik.username%}
+                    <option selected value="{{korisnik.username}}">{{korisnik.username}}</option>
+                {% else %}
+                    <option value="{{korisnik.username}}">{{korisnik.username}}</option>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </select>
+    <input type="submit">
+</form>
+        <div class="row">
+        {%if oglasi %}
+        {% for oglas in oglasi %}
+            <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="col">
+                            <h2 id="naslovOglasa">{{oglas.naziv}}</h2>
+                            <p> Cijena: {{oglas.cijena}}</p>
+                            <p>Proizvod: {{oglas.proizvod}}</p>
+                        </div>
+                        <div class="col">
+                            <p>Količina: {{oglas.kolicina}}</p>
+                            <p>Prijevoz: {{oglas.prijevoz}}</p>
+                            <p>Datum kupnje: {{oglas.datumKupnje.strftime('%d.%m.%Y.')}}</p>
+                        </div>
+                        <div class="col">
+                            <p>Kupac: {{oglas.kupac_id}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <hr>
+        {% endfor %}
+    </div>
+
+        {% else %}
+         <h1>Nemate prodanih oglasa</h1>
+        {% endif %}
+{% endblock %}

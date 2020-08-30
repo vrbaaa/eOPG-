@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+{% block body %}
+        <div class="container">
+            <form method=POST action="" enctype="multipart/form-data" id="forma">
+                {{form.csrf_token}}
+                {{form.adress.csrf_token}}
+                <fieldset class="form-group">
+                    <div class="form-group">
+                        {{ form.username.label(class="form-control-label") }}
+                        {% if form.username.errors %}
+                            {{ form.username(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.username(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.password.label(class="form-control-label") }}
+                        {{ form.password(class="form-control ") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.type.label(class="form-control-label") }}
+                        {% if form.type.errors %}
+                            {{ form.type(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.type.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.type(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.email.label(class="form-control-label") }}
+                        {% if form.email.errors %}
+                            {{ form.email(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.email(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.oib.label(class="form-control-label") }}
+                        {% if form.oib.errors %}
+                        {{ form.oib(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.oib.errors %}
+                                <span>{{error}}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.oib(class="form-control ") }}
+                    {% endif %}
+                    </div>
+                     <div class="form-group">
+                        {{ form.adress.zupanija.label(class="form-control-label") }}
+                        {{ form.adress.zupanija(class="form-control", id="zupanija") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.adress.opcina.label(class="form-control-label") }}
+                        {{ form.adress.opcina(class="form-control", id="opcina") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.adress.mjesto.label(class="form-control-label") }}
+                        {% if form.adress.mjesto.errors %}
+                            {{ form.adress.mjesto(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.mjesto.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.adress.mjesto(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.adress.ulica.label(class="form-control-label") }}
+                        {% if form.adress.ulica.errors %}
+                            {{ form.adress.ulica(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.adress.ulica.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.adress.ulica(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.adress.kbr.label(class="form-control-label") }}
+                        {% if form.adress.kbr.errors %}
+                            {{ form.adress.kbr(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.adress.kbr.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.adress.kbr(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.picture.label() }}
+                        {{ form.picture(class="form-control-file", id="file") }}
+                        {% if form.picture.errors %}
+                            {% for error in form.picture.errors %}
+                                <span class="text-danger">{{ error }}</span></br>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{form.submit(class="btn btn-outline-info") }}
+                    </div>
+                </fieldset>
+             </form>
+        </div>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        let zupanija_select = document.getElementById('zupanija')
+        let opcina_select = document.getElementById('opcina')
+
+        zupanija_select.onchange = function() {
+            zupanija = zupanija_select.value;           
+            fetch('/opcina/' + zupanija).then(function(response){
+                response.json().then(function(data) {
+                    let optionHTML = '';
+                    for (let opcinaGrad of data.gradoviopcine) {
+                        optionHTML += '<option value="' + opcinaGrad.id + '">' + opcinaGrad.name + '</option>';
+                    }
+                    opcina_select.innerHTML = optionHTML;
+                });
+            });
+        }
+
+        window.onload = function() {
+            zupanija = zupanija_select.value;           
+            fetch('/opcina/' + zupanija).then(function(response){
+                response.json().then(function(data) {
+                    let optionHTML = '';
+                    for (let opcinaGrad of data.gradoviopcine) {
+                        optionHTML += '<option value="' + opcinaGrad.id + '">' + opcinaGrad.name + '</option>';
+                    }
+                    opcina_select.innerHTML = optionHTML;
+                });
+            });
+        }
+
+  const file = document.getElementById('file');   
+
+  file.addEventListener("change", function(e){
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "admin_dodaj_korisnika");
+    xhr.upload.addEventListener("progress", e=> {
+        console.log(e);
+    });
+  });
+    </script>
+{% endblock %}

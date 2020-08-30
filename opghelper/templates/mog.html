@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{category}}">
+          {{message}}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+    <div class="row">
+        {% for oglas in oglasi %}
+        <div class="modal fade" id="izbrisiModal{{ oglas._id }}" tabindex="-1" role="dialog" aria-labelledby="izbrisiModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="izbrisiModalLabel">Brisanje oglasa</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <p>Jeste li sigurni da želite izbrisati ovu ponudu? {{oglas._id}}</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                  <a class="btn btn-danger" id="down" href="{{url_for('opg.izbrisiOglas', oglas_id = oglas._id)}}"><i class="fas fa-times"></i> Izbriši oglas </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <div class="modal fade" id="exampleModal{{ oglas._id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <form action="{{url_for('opg.azurirajOglas', oglas_id = oglas._id)}}" method=POST>
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Uredi oglas</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <fieldset class="form-group">
+                    <label class="form-control-label" for="oglasTitle">Naziv oglasa: </label>
+                    <input type="text" class="form-control" name="naziv" id="naziv" value="{{oglas.naziv}}">
+                    <label class="form-control-label" for="cijena">Cijena: </label>
+                    <input type="text" class="form-control" name="cijena" id="cijena" value="{{oglas.cijena}}">
+                    <label class="form-control-label" for="proizvod">Proizvod: </label>
+                    <select name="proizvod" class="form-control" id="proizvod-{{oglas._id }}">
+                        {% for product in products %}
+                            {% if oglas.proizvod == product.name %}
+                                <option selected value="{{product.name}}">{{product.name}}</option>
+                            {% else %}
+                                <option value="{{product.name}}">{{product.name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <label class="form-control-label" for="kolicina">Količina: </label>
+                    <input type="text" class="form-control" name="kolicina" id="kolicina" value="{{oglas.kolicina}}">
+                    <label class="form-control-label" for="datumKupnje">Datum dostave: </label>
+                    <input type="text" class="form-control" name="datumKupnje" id="datumKupnje" value="{{oglas.datumDostave.strftime('%d.%m.%Y.')}}">
+                    <label class="form-control-label" for="prijevoz">Prijevoz: </label> <br>
+                    {% if oglas.prijevoz == 'opg' %}
+                        <input type="radio" id="centar" name="prijevoz" value="centar">
+                        <label for="centar">Centar</label>
+                        <input type="radio" id="opg" name="prijevoz" value="opg" checked="true">
+                        <label for="opg">OPG</label><br>
+                        {% else %}
+                        <input type="radio" id="centar" name="prijevoz" value="centar" checked="true">
+                        <label for="centar">Centar</label>
+                        <input type="radio" id="opg" name="prijevoz" value="opg" >
+                        <label for="opg">OPG</label><br>
+                    {% endif %}
+                </fieldset>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                  <input type="submit" class="btn btn-primary" value="Azuriraj">
+                </div>
+                </form>
+              </div>
+            </div>
+        </div>
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="col">
+                            <h2>{{oglas.naziv}}</h2>
+                            <p>Cijena: {{oglas.cijena}}</p>
+                            <p>Proizvod: {{oglas.proizvod}}</p>
+                        </div>
+                        <div class="col">
+                            <p>Količina: {{oglas.kolicina}}</p>
+                            <p>Prijevoz: {{oglas.prijevoz}}</p>
+                            <p>Datum dostave: {{oglas.datumDostave.strftime('%d.%m.%Y.')}}</p>
+                        </div>
+                        <div class="col">
+                            <p>Datum i vrijeme objavljivanja: {{oglas.datumIVrijemeObjavljivanja.strftime('%d.%m.%Y.')}}</p>
+                            <p>Status oglasa: 
+                                {% if oglas.zatvoren %}
+                                    Zatvoren
+                                {%else%}
+                                    Otvoren
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#exampleModal{{ oglas._id }}">Uredi oglas</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#izbrisiModal{{ oglas._id }}">Izbriši oglas</button>
+                                <form action="{{url_for('opg.prikaziProtuponude', oglas_id = oglas._id)}}">
+                                    <button type="button" onclick="location.href='{{url_for('opg.prikaziProtuponude', oglas_id = oglas._id)}}'" class="btn btn-sm btn-outline-secondary" id="down" > Pogledaj protuponude
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

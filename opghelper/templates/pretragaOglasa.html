@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% block body %}
+        <form class="" action="opg.search" method="GET">
+            <label class="form-control-label" for="proizvod">Pretraži po Proizvodu: </label>
+            <select name="proizvod" class="form-control" style="width: 50%;" name="proizvod" id="proizvod">
+                {% if proizvod == 'Svi proizvodi' %}
+                    <option  selected value="Svi proizvodi">Svi proizvodi</option>
+                    {% for product in products %}
+                        <option value="{{product.name}}">{{product.name}}</option>
+                    {% endfor %}
+                {% else %}
+                   <option value="Svi proizvodi">Svi proizvodi</option>
+                    {% for product in products %}
+                        {% if proizvod == product.name%}
+                            <option selected value="{{product.name}}">{{product.name}}</option>
+                        {% else %}
+                            <option value="{{product.name}}">{{product.name}}</option>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </select>
+            <label for="cijena">Unesite maksimalnu cijenu koju želite platiti za proizvod </label>
+            {% if cijena %}
+                <input type="number" selected value="{{cijena}}" name="cijena"id="cijena">
+            {% else %}
+                <input type="number" name="cijena"id="cijena">
+            {% endif %}
+            <button type="submit" class="btn btn-primary">Pretraži</button>
+        </form>
+    <br>
+    <div class="row">
+        {% for oglas in oglasi %}
+            <div class="modal fade" id="prihvatiModal{{ oglas._id }}" tabindex="-1" role="dialog" aria-labelledby="prihvatiModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="prihvatiModalLabel">Prihvaćanje oglasa</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Jeste li sigurni da želite odabrati ovu ponudu? {{oglas.naziv}}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                            <a class="btn btn-primary" id="down" href="{{url_for('opg.prihvatiOglasCentra', oglas_id = oglas._id )}}"><i class="fas fa-check"></i> Prihvati oglas </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="protuponudaModal{{ oglas._id }}" tabindex="-1" role="dialog" aria-labelledby="protuponudaModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <form action="{{url_for('opg.posaljiProtuponuduCentru', oglas_id = oglas._id)}}" method=POST>
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="protuponudaModalLabel">Napravi protuponudu za ovaj oglas</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        {% set og =  oglas._id%}
+                        {% if og|string in prot %}
+                            <strong>Već ste poslali protuponudu za ovaj oglas</strong>
+                            {% else %}
+                            <input class="form-control" type="text" name="cijena" id="cijena" value="{{oglas.cijena}}">
+                            <input class="form-control" type="text" name="kolicina" id="kolicina" value="{{oglas.kolicina}}">
+                            <input class="form-control" type="text" name="prijevoz" id="prijevoz" value="{{oglas.prijevoz}}">
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                      {% if oglas._id in prot %}
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                            {% else %}
+                            <input type="submit" value="Pošalji protuponudu">
+                        {% endif %}
+                      
+                    </div>
+                    </form>
+                  </div>
+                </div>
+            </div>
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <div class="col">
+                                <h2>{{oglas.naziv}}</h2>
+                                <h3>Centar: {{oglas.objavio}}</h3>
+                                <p>Proizvod: {{oglas.proizvod}}</p>
+                                <p>Cijena: {{oglas.cijena}}</p>
+                            </div>
+                            <div class="col">
+                                <p>Količina: {{oglas.kolicina}}</p>
+                                <p>Datum dostave: {{oglas.datumDostave.strftime('%d.%m.%Y.')}}</p>
+                                <p>Prijevoz: {{oglas.prijevoz}}</p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="uredi" data-toggle="modal" data-target="#protuponudaModal{{ oglas._id }}">Protuponuda</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="down" data-toggle="modal" data-target="#prihvatiModal{{ oglas._id }}"><i class="fas fa-check"></i>Prihvati oglas</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <hr>
+        {% endfor %}
+        </div>
+{% endblock %}

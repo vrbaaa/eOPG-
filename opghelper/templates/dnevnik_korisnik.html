@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block body %}
+    <form class="" action="admin_search_korisnik" method="GET">
+        <label class="form-control-label" for="radnja">Pretraži po korisniku: </label>
+        <select name="korisnik" class="form-control" name="korisnik" id="korisnik">
+                {% for korisnik in korisnici %}
+                    {% if kor == korisnik.username%}
+                        <option selected value="{{korisnik.username}}">{{korisnik.username}}</option>
+                    {% else %}
+                        <option value="{{korisnik.username}}">{{korisnik.username}}</option>
+                    {% endif %}
+                {% endfor %}
+        </select>
+        <input type="submit">
+    </form>
+
+    <div class="table-responsive-sm">
+        <table class="table">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">Radnja</th>
+                <th scope="col">Količina</th>
+            </tr>
+            </thead>
+            <tbody>
+                {%for d in dnevnik %}
+                    <tr>
+                        <td>{{d._id}}</a></td>
+                        <td>{{d.total}}</td>
+                    </tr>   
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

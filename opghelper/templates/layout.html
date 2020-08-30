@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>OPG Helper</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    </head>
+
+    <body>
+        {% block login %}  {% endblock %}
+        {% block zahtjev %}  {% endblock %}
+        {% if session['username'] %}
+                <div class="sidebar active" id="sidebar">
+                    <div class="custom-menu">
+                        <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                            <i class="fa fa-bars"></i>
+                            <span class="sr-only">Toggle Menu</span>
+                        </button>
+                    </div>
+                    <h2 id="imeKorisnika">{{session['username']}}</h2>
+                    <ul>
+                        {% if session['type'] == 'centar' %}
+                            <li><a href="{{ url_for('users.index') }}"><i class="fas fa-home"></i>Početna</a></li>
+                            <li><a href="{{ url_for('centri.dodajOglasCentar') }}"><i class="fas fa-address-card"></i>Predaj oglas</a></li>
+                            <li><a href="{{ url_for('centri.oglasiOpgova') }}"></i>Pretraga oglasa</a></li>
+                            <li><a href="{{ url_for('centri.mojiOglasiCentar') }}"><i class="fas fa-blog"></i>Moji oglasi</a></li>
+                            <li><a href="{{url_for('centri.povijestKupnje')}}"><i class="fas fa-address-book"></i>Povijest kupnje</a></li>
+                            <li><a href="{{url_for('centri.pregledOpgova')}}"><i class="fas fa-map-pin"></i>Pregled opgova</a></li>
+                            <li><a href="{{url_for('users.porukeAdmina')}}"><i class="fas fa-map-pin"></i>Poruke s adminom
+                                <span class="upper badge badge-danger" style="visibility: hidden">
+                                </span>
+                            </a></li>
+                            <a class="btn btn-danger" id="down" href="{{url_for('users.logout')}}"> Odjavi se </a>
+                        {% endif %}
+                        {% if session['type'] == 'opg' %}
+                            <li><a href="{{ url_for('users.index') }}"><i class="fas fa-home"></i>Početna</a></li>
+                            <!-- <li><a href="#"><i class="fas fa-user"></i>Profil</a></li> -->
+                            <li><a href="{{ url_for('opg.predajaOglasa') }}"><i class="fas fa-address-card"></i>Predaj ponudu</a></li>
+                            <li><a href="{{ url_for('opg.pretragaOglasa') }}"><i class="fas fa-project-diagram"></i>Pretraga oglasa</a></li>
+                            <li><a class="slova" href="{{ url_for('opg.mojiOglasi') }}"><i class="fas fa-blog"></i>Moji oglasi</a></li>
+                            <li><a href="{{url_for('opg.povijestProdaje')}}"><i class="fas fa-address-book"></i>Povijest prodaje</a></li>
+                            <li><a href="{{url_for('opg.pregledCentara')}}"><i class="fas fa-map-pin"></i>Pregled centara</a></li>
+                            <li><a href="{{url_for('users.porukeAdmina')}}"><i class="fas fa-map-pin"></i>Poruke s adminom</a></li>
+                            <a  class="btn btn-danger" href="{{url_for('users.logout')}}"> Odjavi se </a>
+                        {% endif %}
+                        {% if session['type'] == 'admin' %}
+                        <li><a href="{{ url_for('users.index') }}"><i class="fas fa-home"></i>Početna</a></li>
+                        <li><a href="{{ url_for('admin.admin_dodaj_korisnika') }}"><i class="fas fa-user"></i>Dodaj novog korisnika</a></li>
+                        <li><a href="{{ url_for('admin.admin_popis_korisnika') }}"><i class="fas fa-user-friends"></i>Popis svih korisnika</a></li>
+                        <li><a href="{{ url_for('admin.admin_dodaj_oglas') }}"><i class="fas fa-pen"></i>Dodaj novi oglas</a></li>
+                        <li><a href="{{ url_for('admin.aktivniOglasi') }}"><i class="fas fa-newspaper"></i>Aktivni oglasi</a></li>
+                        <li><a  href="{{ url_for('admin.pr') }}"><i class="fas fa-clipboard-list"></i>Popis proizvoda</a></li>
+                        <li><a  href="{{ url_for('admin.admin_povijestProdaje') }}"><i class="fas fa-clipboard-check"></i>Povijest prodaje</a></li>
+                        <li><a  href="{{ url_for('admin.admin_dnevnik') }}"><i class="fas fa-table"></i>Dnevnik</a></li>
+                        <li><a  href="{{ url_for('admin.statistika_dnevnik_korisnik') }}"><i class="fas fa-chart-area"></i>Statistika po korisniku</a></li>
+                        <li><a  href="{{ url_for('admin.statistika_dnevnik_radnje') }}"><i class="fas fa-chart-area"></i>Statistika po radnji</a></li>
+                        <li><a  href="{{ url_for('admin.zahtijevi') }}"><i class="fas fa-user-clock"></i>Zahtjevi
+                            <span class="upper badge badge-danger" style="visibility: {% if session['brojZahtjeva'] > 0 %} visible {% else %} hidden {% endif %};">{{session['brojZahtjeva']}}</span>
+                        </a></li>
+                        <a class="btn btn-danger" href="{{url_for('users.logout')}}"> Odjavi se </a>
+                    {% endif %}
+                    </ul> 
+                </div>
+        {% endif %}
+        <div class="main_content p-5" id="main">
+        {% block body %} {% endblock %}
+        </div>
+        <div class="right">
+            
+        </div>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+        {% block script %} {% endblock %}
+    </body>

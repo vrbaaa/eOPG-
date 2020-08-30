@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block body %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{category}}">
+              {{message}}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% if session['type'] == 'opg' %}
+      <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-12">
+            <h2>Zarađeno: {{novac}} kuna</h2>
+            <h3>Ukupno prodanih oglasa: {{brojac}}</h3>
+            {% if brojac != 0%}
+              <h4>Prosječni prihod po oglasu : {{(novac / brojac)|round(2, 'floor') }} kuna</h4>
+            {% endif %}
+            <h3>Koliko puta se koji proizvod prodao</h3>
+            <canvas id="piechart" width="600" height="400"></canvas>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-12">
+            <h4>Prodane količine proizvoda</h4>
+            <canvas id="chart" width="600" height="400"></canvas>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-12">
+            <h4> Ukupno novaca po proizvodu </h4>
+            <canvas id="bachart" width="600" height="400"></canvas>
+          </div>
+        </div>
+        {% endif %}
+        {% if session['type'] == 'centar' %}
+        <div class="row">
+          <div class="col">
+            <h2>Potrošeno: {{novac}} kuna</h2>
+            <h3>Ukupno kupljenih oglasa: {{brojac}}</h3>
+            {% if brojac != 0%}
+              <h4>Prosječna cijena po oglasu : {{(novac / brojac)|round(2, 'floor') }} kuna</h4>
+            {% endif %}
+            <h3>Koliko puta se koji proizvod kupio</h3>
+            <canvas id="piechart" width="600" height="400"></canvas>
+          </div>
+          <div class="col">
+            <h4>Prodane količine proizvoda</h4>
+            <canvas id="chart" width="600" height="400"></canvas>
+          </div>
+          <div class="col">
+            <h4> Ukupno novaca po proizvodu </h4>
+            <canvas id="bachart" width="600" height="400"></canvas>
+          </div>
+        </div>
+        {% endif %}
+        {% if session['type'] == 'admin' %}
+        <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-12">
+            <h2>Ukupno: {{novac}} kuna</h2>
+            <h3>Ukupno kupljenih oglasa: {{brojac}}</h3>
+            {% if brojac != 0%}
+              <h4>Prosječna cijena po oglasu : {{(novac / brojac)|round(2, 'floor') }} kuna</h4>
+            {% endif %}
+            <div class="col-lg-4 col-md-6 col-sm-12">
+              <h4>Koliko puta se koji proizvod kupio</h4>
+              <canvas id="piechart" width="600" height="400"></canvas>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-12">
+            <h4>Prodane količine proizvoda</h4>
+            <canvas id="chart" width="600" height="400"></canvas>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-12">
+            <h4> Ukupno novaca po proizvodu </h4>
+            <canvas id="bachart" width="600" height="400"></canvas>
+          </div>
+        </div>
+        {% endif %}
+{% endblock %}
+{% block script %}
+<script>
+        var pieData = [
+        {% for item, label, colors in set %}
+          {
+            value: {{item}},
+            label: "{{label}}",
+            color : "{{colors}}"
+          },
+        {% endfor %}
+      ];
+
+      var pieChartchart = document.getElementById("piechart").getContext("2d");
+      steps = 3
+      max = {{ max }}
+
+      new Chart(document.getElementById("piechart").getContext("2d")).Pie(pieData);
+//-------------------------------------------------------------------------------------------------------------
+
+       var barData = {
+        labels : [
+          {% for item in labels %}
+           "{{ item }}",
+          {% endfor %}
+	],
+
+        datasets : [{
+          backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9"],
+          data : [
+            {% for item in values %}
+               {{ item }},
+              {% endfor %}
+	    ]
+          }
+        ]
+      }
+
+     new Chart(document.getElementById("chart").getContext("2d")).Bar(barData);
+
+     var barData = {
+        labels : [
+          {% for item in labels %}
+           "{{ item }}",
+          {% endfor %}
+	],
+
+        datasets : [{
+          backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9"],
+          data : [
+            {% for item in uk %}
+               {{ item }},
+              {% endfor %}
+	    ]
+          }
+        ]
+      }
+
+     new Chart(document.getElementById("bachart").getContext("2d")).Bar(barData);
+
+</script>
+{% endblock %}

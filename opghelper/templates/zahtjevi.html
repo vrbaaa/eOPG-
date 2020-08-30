@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="row">
+    {% for zahtjev in zahtjevi %}
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                        <h2 id="naslovOglasa">Korisničko ime : {{zahtjev.username}}</h2>
+                        <p>Tip: {{zahtjev.type}}</p>
+                        <p>E-mail: {{zahtjev.email}}</p>
+                        <p>OIB: {{zahtjev.oib}}</p>
+                        <p>Adresa: {{zahtjev.adress.mjesto}}, {{zahtjev.adress.opcina}}, {{zahtjev.adress.zupanija}}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <button type="button" onclick="location.href='{{url_for('admin.prihvatiZahtjev', zahtjev_id = zahtjev._id)}}'" class="btn btn-sm btn-outline-primary" id="down" >Prihvati korisnika</button>
+                            <button type="button" onclick="location.href='{{url_for('admin.odbijZahtjev', zahtjev_id = zahtjev._id)}}'" class="btn btn-sm btn-outline-danger" id="down" > Odbij korisnika</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}

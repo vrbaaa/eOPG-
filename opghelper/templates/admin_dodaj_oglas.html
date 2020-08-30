@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block body %}
+        <div class="container">
+            <form  method=POST action="">
+                {{form.csrf_token}}
+                <fieldset class="form-group">
+                     <div class="form-group">
+                         {{ form.naziv.label(class="form-control-label") }}
+                         {{ form.naziv(class="form-control ") }}
+                     </div>
+                     <div class="form-group">
+                        {{ form.objavio.label(class="form-control-label") }}
+                        {{ form.objavio(class="form-control") }}
+                    </div>
+                     <div class="form-group">
+                        {{ form.proizvod.label(class="form-control-label") }}
+                        {{ form.proizvod(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.cijena.label(class="form-control-label") }}
+                        {% if form.cijena.errors %}
+                            {{ form.cijena(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.cijena.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.cijena(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.kolicina.label(class="form-control-label") }}
+                        {% if form.kolicina.errors %}
+                            {{ form.kolicina(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.kolicina.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.kolicina(class="form-control ") }}
+                        {% endif %}
+                    </div>
+                    <!-- <div >
+                        {{ form.prijevoz.label(class="form-control-label") }}
+                        {{ form.prijevoz(class="form-control ") }}
+                    </div> -->
+                    <div class="form-group">
+                        {{ form.datumDostave.label(class="form-control-label") }}
+                        {% if form.datumDostave.errors %}
+                            {{ form.datumDostave(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.datumDostave.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{form.datumDostave(class="form-control ") }}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.prijevoz.label(class="form-control-label") }}
+                        {% if form.prijevoz.errors %}
+                            {{ form.prijevoz(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.prijevoz.errors %}
+                                    <span>{{error}}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{form.prijevoz(class="form-control ") }}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{form.submit(class="btn btn-outline-info") }}
+                    </div>
+                </fieldset>
+             </form>
+        </div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block body %}
+    <form class="" action="admin_search_radnja" method="GET">
+        <label class="form-control-label" for="radnja">Pretraži po radnji: </label>
+        <select name="radnja" class="form-control" name="radnja" id="radnja">
+                {% for radnja in radnje %}
+                    {% if rad == radnja %}
+                        <option selected value="{{radnja}}">{{radnja}}</option>
+                    {% else %}
+                        <option value="{{radnja}}">{{radnja}}</option>
+                    {% endif %}
+                {% endfor %}
+        </select>
+        <input type="submit">
+    </form>
+
+    <div class="table-responsive-sm">
+        <table class="table">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">Korisnik</th>
+                <th scope="col">Količina</th>
+            </tr>
+            </thead>
+            <tbody>
+                {%for d in dnevnik %}
+                    <tr>
+                        <td>{{d._id}}</a></td>
+                        <td>{{d.total}}</td>
+                    </tr>   
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

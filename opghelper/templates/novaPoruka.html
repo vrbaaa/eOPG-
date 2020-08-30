@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="container">
+        <div class="por" id="nov">
+            {% for por in poruke %}
+            {% if por.posiljatelj == session['username'] %}
+                <div class="levo" id="inn">
+            {% else %}
+                <div id="out">
+            {% endif %}
+                    {% if por.posiljatelj == session['username'] %}
+                        <h2>Ja</h2>
+                    {% else %}
+                        <h2>{{por.posiljatelj}}</h2>
+                    {% endif %}
+                    <h5>Datum: {{por.datum_slanja.strftime('%d.%m.%Y. %H:%M:%S')}}</h5>
+                    <p>poruka: {{por.poruka}}</p>
+                </div>
+                <hr>
+        {% endfor %}
+        </div>
+        <hr>
+        <!-- <form action="" method="POST"> -->
+            {{form.csrf_token}}
+            <fieldset class="form-group">
+                <div class="form-group">
+                    <label for="primatelj" class="form-control-label"> Primatelj: </label>
+                    <input type="text" class="form-control" name="primatelj" id="send_to_username" disabled placeholder="{{centar}}">
+                </div>
+                <div class="form-group">
+                    {{ form.poruka.label(class="form-control-label") }}
+                    {% if form.poruka.type.errors %}
+                        {{ form.poruka(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.poruka.errors %}
+                                <span>{{error}}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.poruka(class="form-control", id="poruka") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <!-- {{form.submit(class="btn btn-outline-info", id="posalji") }} -->
+                    <input type="submit" id="posalji" class="btn btn-outline-info" value="Pošalji" >
+                </div>
+            </fieldset>
+        <!-- </form> -->
+    </div>
+{% endblock %}
