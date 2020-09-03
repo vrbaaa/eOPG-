@@ -1,19 +1,8 @@
 var socket = io.connect('http://127.0.0.1:5000');
+
+
+
 var private_socket = io('http://127.0.0.1:5000/private');
-
-socket.on('connect', function() {
-    socket.send(document.getElementById('imeKorisnika').innerHTML);
-})
-
-document.getElementById('sidebarCollapse').addEventListener('click', function () {
-    document.getElementById('sidebar').classList.toggle("active");
-    if (document.getElementById('sidebar').classList.contains("active")) {
-        document.getElementById('main').style.width = "100%";
-    } else {
-        document.getElementById('main').style.width = "90%";
-    }
-});
-
 document.getElementById('posalji').onclick = function() {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
@@ -42,6 +31,20 @@ document.getElementById('posalji').onclick = function() {
     document.getElementById('poruka').value = '';
     private_socket.emit('private_message', {'username' : pr, 'poruka' : poruka, 'posiljatelj' : posiljatelj});
 }
+
+socket.on('connect', function() {
+    socket.send(document.getElementById('imeKorisnika').innerHTML);
+})
+
+document.getElementById('sidebarCollapse').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle("active");
+    if (document.getElementById('sidebar').classList.contains("active")) {
+        document.getElementById('main').style.width = "100%";
+    } else {
+        document.getElementById('main').style.width = "90%";
+    }
+});
+
 
 private_socket.on('pokazi', function(msg) {
     var pr = document.getElementById('send_to_username').placeholder;

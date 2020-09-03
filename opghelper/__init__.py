@@ -16,6 +16,7 @@ if app.config['ENV'] == 'development':
     app.config.from_object("config.DevelopmentConfig")
 if app.config['ENV'] == 'testing':
     app.config.from_object("config.TestingConfig")
+    
 mongo = PyMongo(app)
 CORS(app, support_credentials=True)
 bcrypt = Bcrypt(app)

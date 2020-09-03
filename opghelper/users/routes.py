@@ -113,6 +113,7 @@ def index():
                                 ukupnaOcjena += x['rating']
                         ocjena = ukupnaOcjena / brojac
                         if ocjena > 1.5:
+                            session.permanent = True
                             session['username'] =  form.username.data
                             session['type'] = login_user['type']
                             upisiUDnevnik("Prijava u sustav")
@@ -121,6 +122,7 @@ def index():
                         else:
                             flash('Prijava neuspješna. Imate premalu ocjenu', 'danger')  
                     else:
+                        session.permanent = True
                         session['username'] =  form.username.data
                         session['type'] = login_user['type']
                         upisiUDnevnik("Prijava u sustav")
