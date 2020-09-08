@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="container" >
+        <div id="container">
+            {% for poruka in posljednjePoruke %}
+                {% for por in poruka %}
+                <div id="poruka{{por.posiljatelj}}" style="cursor: pointer;" onclick="window.location.href = 'posaljiPoruku/{{por.posiljatelj}}'">
+                            <p id="datum{{por.posiljatelj}}">{{por.datum_slanja.strftime('%d.%m.%Y. %H:%M:%S')}}</p>
+                            <h2 id="posiljatelj{{por.posiljatelj}}">{{por.posiljatelj}}</h2>
+                            <p id="sadrzaj{{por.posiljatelj}}">{{ por['poruka'] }}</p>
+                    {% for b in brNep %}
+                        {% for a in b %}
+                            {% if a[por.posiljatelj] %}
+                                <strong>Broj nepročitanih poruka: <span id="broj{{por.posiljatelj}}">{{a[por.posiljatelj]}} </span></strong> 
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    <hr>
+                </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

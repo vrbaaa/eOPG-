@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, SelectField, IntegerField, FloatField, RadioField, DateField, SubmitField, PasswordField, FieldList, FormField, TextAreaField
+from wtforms import StringField, SelectField, IntegerField, FloatField, RadioField, DateField, SubmitField, PasswordField, FieldList, FormField, TextAreaField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, ValidationError
 from opghelper import  mongo
 
@@ -31,6 +31,7 @@ class UserForm(FlaskForm):
         
 class ProductForm(FlaskForm):
     name = StringField('Naziv proizvoda', validators=[DataRequired()])
+    photo = StringField('Slika proizvoda', validators=[DataRequired()])
     type = RadioField('Vrsta proizvoda',  validators=[DataRequired()], choices=[('voće','Voće'), ('povrće', 'Povrće')])
     
     def validate_name(self, name):
@@ -60,6 +61,7 @@ class UserUpdateForm(FlaskForm):
     oib = StringField('OIB', validators=[DataRequired(), Length(min=13, max=13)])
     adress = FormField(AdressForm)
     picture = FileField('Profilna slika', validators=[FileAllowed(['jpg', 'png'])])
+    blokiran = BooleanField('Blokiran')
     submit = SubmitField('Ažuriraj korisnika')     
     # def validate_email(self, email):
     #     user = mongo.db.users.find_one({"email": email.data})

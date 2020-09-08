@@ -85,6 +85,7 @@ def mojiOglasi():
         productsResults = list(products.find({}))
         offersResults = list(oglasi.find({"objavio" : session['username'], "kupljen" : False}))
         usersResults = users.find({})
+        print(session['type'])
         return render_template("mog.html", oglasi = offersResults, users = usersResults, products = productsResults)
 
 @opg.route('/azurirajOglas/<string:oglas_id>', methods=['GET', 'POST'])
@@ -111,8 +112,11 @@ def azurirajOglas(oglas_id):
 
 @opg.route('/povijestProdaje')
 def povijestProdaje():
+    print("konj")
     if (session['type'] == 'opg'):
         offersResults = oglasi.find({"kupljen" : True, "prodavatelj" : session['username']})
+        konj =  session['username']
+        print(session['brojNeprocitanih'])
         return render_template("povijestProdaje.html", oglasi = offersResults)
     if (session['type'] == 'admin'):
         return redirect(url_for('admin.aktivniOglasi'))

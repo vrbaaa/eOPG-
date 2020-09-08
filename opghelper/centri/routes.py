@@ -331,12 +331,59 @@ def private_message(input):
             print(inst.args)
             print(inst)
         poruka = input['poruka']
-        # upisiUDnevnik("Slanje poruke")
-        poruke.insert_one({"posiljatelj" : input['posiljatelj'], "primatelj" : input['username'], "poruka" : input['poruka'], "datum_slanja" : datetime.now()})
-        emit('pokazi', {'poruka' : poruka, 'posiljatelj' : input['posiljatelj']}, room=primatelj_session_id)
+        #upisiUDnevnik("Slanje poruke")
+        por_id = poruke.insert({"posiljatelj" : input['posiljatelj'], "primatelj" : input['username'],
+                                     "poruka" : input['poruka'], "datum_slanja" : datetime.now(), "procitana" : False})
+        nova_poruka = poruke.find_one({"_id" : ObjectId(por_id)})
+        por_id = str(nova_poruka['_id'])
+        emit('pokazi', {'por_id' : por_id, 'poruka' : poruka, 'posiljatelj' : input['posiljatelj']}, room=primatelj_session_id)
     else: 
-        poruke.insert_one({"posiljatelj" : input['posiljatelj'], "primatelj" : input['username'], "poruka" : input['poruka'], "datum_slanja" : datetime.now()})
+        poruke.insert_one({
+            "posiljatelj" : input['posiljatelj'], "primatelj" : input['username'],
+            "poruka" : input['poruka'], "datum_slanja" : datetime.now(),
+            "procitana" : False})
 
+@io.on('procitana', namespace = '/private')
+def procitajPoruku(input):
+    poruke.update_one(
+        {"_id" : ObjectId(input['por_id'])}, 
+                            {"$set" :
+                            {
+                                "procitana" : True
+                            }
+                            }
+    )
+        
+@io.on('procitaj', namespace = '/private')
+def procitaj(input):
+    print(input['primatelj'])
+    print(input['posiljatelj'])
+    poruke.update_many(
+        {
+            "primatelj" : input['primatelj'],
+            "posiljatelj" : input['posiljatelj']
+        }, 
+                            {"$set" :
+                            {
+                                "procitana" : True
+                            }
+                            }
+    )
+    noviBroj =   poruke.find({"$and": [
+                                    {"primatelj" : input['primatelj']},
+                                    {"procitana" : False}
+                                ]
+                            }).count()
+    emit('azurNotif', {'brojNeprocitanih' : str(noviBroj)})
+
+@io.on('prikaziNotifikaciju', namespace = '/private') 
+def prikaziNotifikaciju(input):
+    noviBroj =   poruke.find({"$and": [
+                                    {"primatelj" : input['citatelj']},
+                                    {"procitana" : False}
+                                ]
+                            }).count()
+    emit('azurNotif', {'brojNeprocitanih' : str(noviBroj)})
     
 @centri.route('/posaljiPoruku/<string:opg>', methods=['GET', 'POST'])
 def posaljiPoruku(opg):

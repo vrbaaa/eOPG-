@@ -93,6 +93,16 @@
     margin-bottom: 20px;
   }
 
+  button a {
+    color: white;
+    text-decoration: none;
+  }
+
+  button a:hover {
+    color: white;
+    text-decoration: none;
+  }
+
   a {
     color: #7fd657;
     display:inline-block;
@@ -100,6 +110,10 @@
     font-weight: 400;
   }
   
+  .navbar-light .navbar-nav .nav-link {
+    color: red;
+}
+
   h2 {
     text-align: center;
     font-size: 16px;
@@ -110,6 +124,10 @@
     color: #7fd657;
   }
   
+  ul {
+    list-style-type: none;
+}
+
   .right {
     float: right;
     width: 5%;
@@ -341,6 +359,11 @@
   
   #icon {
     width:60%;
+  }
+
+  .proizvod{
+    height: 90px;
+    width: 120px;
   }
 
   .unos{

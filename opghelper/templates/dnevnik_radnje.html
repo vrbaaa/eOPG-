@@ -1,5 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('admin.statistika_dnevnik_korisnik')}}">Statistika po korisniku</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active" href="#">Statistika po radnji</a>
+    </li>
+  </ul>
     <form class="" action="admin_search_radnja" method="GET">
         <label class="form-control-label" for="radnja">Pretraži po radnji: </label>
         <select name="radnja" class="form-control" name="radnja" id="radnja">
@@ -11,7 +19,7 @@
                     {% endif %}
                 {% endfor %}
         </select>
-        <input type="submit">
+        <input type="submit" value="Pretraži">
     </form>
 
     <div class="table-responsive-sm">

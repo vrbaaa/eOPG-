@@ -27,9 +27,10 @@
                             <li><a href="{{ url_for('centri.mojiOglasiCentar') }}"><i class="fas fa-blog"></i>Moji oglasi</a></li>
                             <li><a href="{{url_for('centri.povijestKupnje')}}"><i class="fas fa-address-book"></i>Povijest kupnje</a></li>
                             <li><a href="{{url_for('centri.pregledOpgova')}}"><i class="fas fa-map-pin"></i>Pregled opgova</a></li>
-                            <li><a href="{{url_for('users.porukeAdmina')}}"><i class="fas fa-map-pin"></i>Poruke s adminom
-                                <span class="upper badge badge-danger" style="visibility: hidden">
-                                </span>
+                            <li><a href="{{url_for('users.porukeAdmina')}}"><i class="fas fa-envelope"></i>Poruke s adminom</a></li>
+                            <li><a href="{{url_for('users.porukee')}}"><i class="fas fa-inbox"></i>Poruke
+                                {% set new_messages = broj %}
+                                <span id="notif" class="upper badge badge-danger" style="visibility: {% if new_messages %} visible {% else %} hidden {% endif %};">{{ new_messages }}</span>
                             </a></li>
                             <a class="btn btn-danger" id="down" href="{{url_for('users.logout')}}"> Odjavi se </a>
                         {% endif %}
@@ -41,22 +42,26 @@
                             <li><a class="slova" href="{{ url_for('opg.mojiOglasi') }}"><i class="fas fa-blog"></i>Moji oglasi</a></li>
                             <li><a href="{{url_for('opg.povijestProdaje')}}"><i class="fas fa-address-book"></i>Povijest prodaje</a></li>
                             <li><a href="{{url_for('opg.pregledCentara')}}"><i class="fas fa-map-pin"></i>Pregled centara</a></li>
-                            <li><a href="{{url_for('users.porukeAdmina')}}"><i class="fas fa-map-pin"></i>Poruke s adminom</a></li>
+                            <li><a href="{{url_for('users.porukeAdmina')}}"><i class="fas fa-envelope"></i>Poruke s adminom</a></li>
+                            <li><a href="{{url_for('users.porukee')}}"><i class="fas fa-inbox"></i>Poruke
+                                {% set new_messages = broj %}
+                                <span id="notif" class="upper badge badge-danger" style="visibility: {% if broj %} visible {% else %} hidden {% endif %};">{{ broj }}</span>
+                                </a></li>
                             <a  class="btn btn-danger" href="{{url_for('users.logout')}}"> Odjavi se </a>
                         {% endif %}
                         {% if session['type'] == 'admin' %}
                         <li><a href="{{ url_for('users.index') }}"><i class="fas fa-home"></i>Početna</a></li>
-                        <li><a href="{{ url_for('admin.admin_dodaj_korisnika') }}"><i class="fas fa-user"></i>Dodaj novog korisnika</a></li>
                         <li><a href="{{ url_for('admin.admin_popis_korisnika') }}"><i class="fas fa-user-friends"></i>Popis svih korisnika</a></li>
-                        <li><a href="{{ url_for('admin.admin_dodaj_oglas') }}"><i class="fas fa-pen"></i>Dodaj novi oglas</a></li>
-                        <li><a href="{{ url_for('admin.aktivniOglasi') }}"><i class="fas fa-newspaper"></i>Aktivni oglasi</a></li>
+                        <li><a href="{{ url_for('admin.aktivniOglasi') }}"><i class="fas fa-newspaper"></i>Oglasi</a></li>
                         <li><a  href="{{ url_for('admin.pr') }}"><i class="fas fa-clipboard-list"></i>Popis proizvoda</a></li>
-                        <li><a  href="{{ url_for('admin.admin_povijestProdaje') }}"><i class="fas fa-clipboard-check"></i>Povijest prodaje</a></li>
                         <li><a  href="{{ url_for('admin.admin_dnevnik') }}"><i class="fas fa-table"></i>Dnevnik</a></li>
-                        <li><a  href="{{ url_for('admin.statistika_dnevnik_korisnik') }}"><i class="fas fa-chart-area"></i>Statistika po korisniku</a></li>
-                        <li><a  href="{{ url_for('admin.statistika_dnevnik_radnje') }}"><i class="fas fa-chart-area"></i>Statistika po radnji</a></li>
+                        <li><a  href="{{ url_for('admin.statistika_dnevnik_korisnik')}}"><i class="fas fa-chart-area"></i>Statistika iz dnevnika</a></li>
+                        <li><a href="{{url_for('users.porukee')}}"><i class="fas fa-map-pin"></i>Poruke
+                            {% set new_messages = broj %}
+                            <span id="notif" class="upper badge badge-danger" style="visibility: {% if new_messages %} visible {% else %} hidden {% endif %};">{{ new_messages }}</span>
+                            </a></li>
                         <li><a  href="{{ url_for('admin.zahtijevi') }}"><i class="fas fa-user-clock"></i>Zahtjevi
-                            <span class="upper badge badge-danger" style="visibility: {% if session['brojZahtjeva'] > 0 %} visible {% else %} hidden {% endif %};">{{session['brojZahtjeva']}}</span>
+                            <span  class="upper badge badge-danger" style="visibility: {% if session['brojZahtjeva'] %} visible {% else %} hidden {% endif %};">{{ session['brojZahtjeva']  }}</span>
                         </a></li>
                         <a class="btn btn-danger" href="{{url_for('users.logout')}}"> Odjavi se </a>
                     {% endif %}

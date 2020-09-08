@@ -159,6 +159,7 @@ def admin_popis_korisnika():
         except Exception as ex: 
             print(ex)
         print(ocjena)
+        print(centri)
         return render_template ('admin_popis_korisnika.html',centri = centri, ja = session['username'], ocjene = ocjena)
 
 @admin.route('/admin_proizvodi', methods=['GET', 'POST'])
@@ -179,7 +180,8 @@ def admin_proizvodi():
         if form.validate_on_submit():
             products.insert_one({
                 "name" : form.name.data,
-                "type": form.type.data
+                "type": form.type.data,
+                "photo": form.photo.data
             })
             
             flash ('Dodali ste novi proizvod', 'success')
@@ -194,7 +196,8 @@ def pr():
     if form.validate_on_submit():
             products.insert_one({
                 "name" : form.name.data,
-                "type": form.type.data
+                "type": form.type.data,
+                "photo" : form.photo.data
             })
             flash ('Dodali ste novi proizvod', 'success')
             return render_template('proizvodi.html', form=form)
@@ -208,6 +211,7 @@ def json_proizvodi():
                     "id" : str(ObjectId(p['_id'])),
                     "name" : p['name'],
                     "type" : p['type'], 
+                    "photo" : p['photo'], 
                     "total" : 0                
                 })
         producti = list(oglasi.aggregate([
@@ -221,7 +225,6 @@ def json_proizvodi():
                     ind = indexOfElem(jsonOutput, 'name', p['name'])
                     jsonOutput[ind]['total'] = pr['total']
         jsonOutput.sort(reverse=True, key=myFunc)
-        #print(jsonOutput.index("name: Luk"))
         return jsonify({'result' : jsonOutput})
 
         
@@ -229,8 +232,9 @@ def json_proizvodi():
 def dodaj_proizvod():
     name = request.json['name']
     type = request.json['type']
+    photo = request.json['photo']
         
-    proizvod_id = products.insert({"name" : name, "type" : type})  
+    proizvod_id = products.insert({"name" : name, "type" : type, "photo" : photo})  
     novi_proizvod = products.find_one({"_id" : proizvod_id})
         
     output = {'name' : novi_proizvod['name'], 'type' : novi_proizvod['type']}
@@ -242,7 +246,8 @@ def azuriraj_proizvod(name):
     az_proizvod = products.update_one({"name" : name},
                                    {"$set" : {
                                        "name" :  request.json['name'],
-                                       "type" :  request.json['type']
+                                       "type" :  request.json['type'],
+                                       "photo" :  request.json['photo'],
                                    }})
     
     novi_proizvod = products.find_one({"name" : request.json['name']})
@@ -266,6 +271,7 @@ def uredi_proizvod(pid):
                             {
                                 "name" : request.form.get('name'),
                                 "type" : request.form.get('vrsta'),
+                                "photo" : request.form.get('photo'),
                             }
                             })
             flash('Uspješno ste ažurirali proizvod!', 'success')
@@ -518,7 +524,8 @@ def racun(user):
                                 "oib" : form.oib.data,
                                 "adress" : form.adress.data,
                                 "datumIVrijemeAzuriranja" : datetime.now(),
-                                "picture" : picture
+                                "picture" : picture,
+                                "blokiran" : form.blokiran.data
                               }
                             }
                           )

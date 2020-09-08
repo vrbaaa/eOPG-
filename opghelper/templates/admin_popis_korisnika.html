@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-    <table class="table">
+<button type="button" class="btn btn-success" id="dodaj"><a href="{{ url_for('admin.admin_dodaj_korisnika') }}"> Dodaj novog korisnika</a> </button>
+<br>
+<table class="table">
         <thead class="thead-dark">
           <tr>
             <th scope="col">Slika</th>

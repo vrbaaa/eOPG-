@@ -39,6 +39,19 @@
                    {{ form.type(class="form-control ") }}
                {% endif %}
                </div>
+               <div class="form-group">
+                {{ form.photo.label(class="form-control-label") }}
+                {% if form.photo.errors %}
+                    {{ form.photo(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.photo.errors %}
+                            <span>{{error}}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.photo(class="form-control ") }}
+                {% endif %}
+            </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
@@ -55,6 +68,7 @@
       <tr>
         <th scope="col">Naziv proizvoda</th>
         <th scope="col">Vrsta proizvoda</th>
+        <th scope="col">Slika proizvoda</th>
         <th scope="col">Količina prodana</th>
         <th scope="col">Uredi</th>
       </tr>
@@ -100,6 +114,10 @@
                                     <input type="radio" id="voće" name="vrsta" value="voće" >
                                     <label for="voće">voće</label><br>`}
                         </div>
+                        <div class="form-group">
+                            <label for="photo" class="form-control-label">Slika: </label> <br>
+                            <input type="text" class="form-control" name="photo" id="photo" value="${res.photo}">
+                        </div>
                     </div>
                     <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
@@ -113,6 +131,7 @@
             tr.innerHTML = 
             '<td>' + res.name + '</td>' +
             '<td>' + res.type + '</td>' +
+            '<td> <img src=' + res.photo + ' class="proizvod" alt=""></td>' +
             '<td>' + res.total + '</td>' +
             '<td>' + '<button type="button" class="btn btn-primary" id="uredi" data-toggle="modal" data-target="#urediModal' 
             + res.id + '"' + '>Uredi proizvod</button></td>';

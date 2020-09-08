@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, session, jsonify, Blueprint
+from flask import render_template, url_for, flash, redirect, request, session, jsonify, Blueprint, make_response
 from opghelper import app, mongo, bcrypt, io
 from flask_login import login_user, current_user, logout_user
 from bson.objectid import ObjectId
@@ -47,6 +47,18 @@ def upisiUDnevnik(radnja):
                                 "vrijeme" : datetime.now()
                             }
                         )
+@users.context_processor
+def context_processor():
+    if 'username' in session:
+        broj = poruke.find({
+                                    "$and": [
+                                        {"primatelj" : session['username']},
+                                        {"procitana" : False}
+                                    ]
+                                }).count()
+        return dict(broj=broj)  
+    else:
+        return dict(val="kkk")
 
 @users.route('/', methods=['GET', 'POST'])
 def index():
@@ -103,40 +115,45 @@ def index():
             login_user = userss.find_one({'username' : form.username.data})
             if login_user and login_user['password'] == form.password.data:
                 if form.username.data != 'admin':
-                    if len(login_user['ratings']) > 2:
-                        ocjena = 0
-                        brojac = 0
-                        ukupnaOcjena = 0
-                        for x in login_user['ratings']:
-                            if x != '': 
-                                brojac = brojac + 1
-                                ukupnaOcjena += x['rating']
-                        ocjena = ukupnaOcjena / brojac
-                        if ocjena > 1.5:
+                    if login_user['blokiran']:
+                        flash('Prijava neuspješna. Blokirani ste od strane administraora', 'danger')
+                    else:
+                        if len(login_user['ratings']) > 2:
+                            ocjena = 0
+                            brojac = 0
+                            ukupnaOcjena = 0
+                            for x in login_user['ratings']:
+                                if x != '': 
+                                    brojac = brojac + 1
+                                    ukupnaOcjena += x['rating']
+                            ocjena = ukupnaOcjena / brojac
+                            if ocjena > 1.5:
+                                session.permanent = True
+                                session['username'] =  form.username.data
+                                session['type'] = login_user['type']
+                                upisiUDnevnik("Prijava u sustav")
+                                flash('Prijavljeni ste.', 'success')
+                                return redirect(url_for('users.index'))
+                            else:
+                                flash('Prijava neuspješna. Imate premalu ocjenu', 'danger')  
+                        else:
                             session.permanent = True
                             session['username'] =  form.username.data
                             session['type'] = login_user['type']
                             upisiUDnevnik("Prijava u sustav")
                             flash('Prijavljeni ste.', 'success')
                             return redirect(url_for('users.index'))
-                        else:
-                            flash('Prijava neuspješna. Imate premalu ocjenu', 'danger')  
-                    else:
-                        session.permanent = True
+                else: 
                         session['username'] =  form.username.data
                         session['type'] = login_user['type']
                         upisiUDnevnik("Prijava u sustav")
                         flash('Prijavljeni ste.', 'success')
-                        return redirect(url_for('users.index'))
-                else: 
-                    session['username'] =  form.username.data
-                    session['type'] = login_user['type']
-                    upisiUDnevnik("Prijava u sustav")
-                    flash('Prijavljeni ste.', 'success')
-                    return redirect(url_for('users.index'))       
+                        return redirect(url_for('users.index'))       
             else:
-                flash('Prijava neuspješna. Nesipravno korisničko ime ili lozinka', 'danger')
+                    flash('Prijava neuspješna. Nesipravno korisničko ime ili lozinka', 'danger')
+                    #return render_template('index.html', form = form)
         return render_template('index.html', form = form)
+
 
 @users.route('/logout')
 def logout():
@@ -189,3 +206,28 @@ def porukeAdmina():
     })
     return render_template("novaPoruka.html", form = form, centar = c, poruke = por)
 
+@users.route('/porukee', methods=['GET', 'POST'])
+def porukee():
+    posiljatelji = poruke.distinct(("posiljatelj"), {"primatelj": session['username']}) 
+    posljednjePoruke = []
+    brNep = []
+    for posiljatelj in posiljatelji:
+        zadnjePorukePoPosiljatelju = list(poruke.find({"posiljatelj": posiljatelj,  "primatelj": session['username']}).sort([("datum_slanja",  -1)]).limit(1))
+        brojNeprocitanihPoKorisniku = list(poruke.aggregate([ 
+                    {
+                        "$match": 
+                            {
+                                "$and": [
+                                    {"primatelj" : session['username']},
+                                    {"procitana" : False}, 
+                                    {"posiljatelj" : posiljatelj}
+                                ]
+                            }
+                        },
+                    {"$count": posiljatelj }
+                    ]))
+        posljednjePoruke.append(zadnjePorukePoPosiljatelju)
+        brNep.append(brojNeprocitanihPoKorisniku)
+        print(brojNeprocitanihPoKorisniku)
+    print(brNep)
+    return render_template('poruke.html', posljednjePoruke = posljednjePoruke, brNep = brNep)
