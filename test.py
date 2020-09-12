@@ -20,7 +20,7 @@ class FlaskTestCase(unittest.TestCase):
         tester = app.test_client()
         response = tester.post(
             '/',
-            data=dict(username='admin', password='administrator'),
+            data=dict(korisnicko_ime='admin', password='administrator'),
             follow_redirects=True
         )
         self.assertIn(b'Prijavljeni ste', response.data)
@@ -29,7 +29,7 @@ class FlaskTestCase(unittest.TestCase):
         tester = app.test_client()
         response = tester.post(
             '/',
-            data=dict(username="wrong", password="wrong"),
+            data=dict(korisnicko_ime="wrong", password="wrong"),
             follow_redirects=True
         )
         self.assertIn(b'ime ili lozinka', response.data)
@@ -39,7 +39,7 @@ class FlaskTestCase(unittest.TestCase):
         tester = app.test_client()
         tester.post(
             '/',
-            data={'username':'admin', 'password':'administrator'},
+            data={'korisnicko_ime':'admin', 'password':'administrator'},
             follow_redirects=True
         )
         response = tester.get('/logout', follow_redirects=True)
@@ -54,7 +54,7 @@ class FlaskTestCase(unittest.TestCase):
         tester = app.test_client(self)
         tester.post(
             '/',
-            data={'username':'admin', 'password':'administrator'},
+            data={'korisnicko_ime':'admin', 'password':'administrator'},
             follow_redirects=True
         )
         response = tester.get('/admin_popis_korisnika', follow_redirects=True)

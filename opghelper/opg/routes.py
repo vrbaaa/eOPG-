@@ -9,8 +9,8 @@ import requests
 from opghelper.opg.forms import OglasForm, OcjenaForm, MessageForm
 
 
-users = mongo.db.users
-products = mongo.db.products
+users = mongo.db.korisnici
+products = mongo.db.proizvodi
 offers = mongo.db.offers
 protuponude = mongo.db.protuponude
 protuponudeZaCentar = mongo.db.protuponudeZaCentar
@@ -24,7 +24,7 @@ def upisiUDnevnik(radnja):
     if (session['type'] != 'admin'):
         dnevnik.insert_one(
                             {
-                                "korisnik" : session['username'],
+                                "korisnik" : session['korisnicko_ime'],
                                 "radnja" : radnja,
                                 "vrijeme" : datetime.now()
                             }
@@ -35,12 +35,12 @@ def predajaOglasa():
     if (session['type'] == 'opg'):
         form = OglasForm()
         kor = []
-        form.proizvod.choices = [(proizvod['name'], proizvod['name']) for proizvod in products.find({})]
+        form.proizvod.choices = [(proizvod['naziv'], proizvod['naziv']) for proizvod in products.find({})]
         print(form.errors)
         if form.validate_on_submit():
             upisiUDnevnik("Dodavanje novog oglasa")
             oglasi.insert_one({
-                "objavio" : session['username'],
+                "objavio" : session['korisnicko_ime'],
                 "naziv" : form.naziv.data,
                 "cijena" : form.cijena.data,
                 "kolicina" :form.kolicina.data,
@@ -55,8 +55,8 @@ def predajaOglasa():
             flash('Objavili ste uspješno novi oglas!', 'success')
             ogl = oglasi.distinct("objavio", {"kupljen" : False, "tipObjavio" : "centar", "proizvod" : form.proizvod.data, "kolicina" : {"$gte" : form.kolicina.data}})
             for og in ogl:
-                us = list(users.find({"username" : og}))
-                message = "OPG " + session['username'] + "je objavio oglas za proizvod " + form.proizvod.data +" Kolicina : " + str(form.proizvod.data) +" Cijena " + str(form.cijena.data) +" kn. Posaljite mu poruku preko sustava i dogovorite kupnju proizvoda."
+                us = list(users.find({"korisnicko_ime" : og}))
+                message = "OPG " + session['korisnicko_ime'] + "je objavio oglas za proizvod " + form.proizvod.data +" Kolicina : " + str(form.proizvod.data) +" Cijena " + str(form.cijena.data) +" kn. Posaljite mu poruku preko sustava i dogovorite kupnju proizvoda."
                 msg = message.encode('utf-8')
                 server  = smtplib.SMTP("smtp.gmail.com", 587)
                 server.starttls()
@@ -83,7 +83,7 @@ def izbrisiOglas(oglas_id):
 def mojiOglasi():
     if (session['type'] == 'opg'):
         productsResults = list(products.find({}))
-        offersResults = list(oglasi.find({"objavio" : session['username'], "kupljen" : False}))
+        offersResults = list(oglasi.find({"objavio" : session['korisnicko_ime'], "kupljen" : False}))
         usersResults = users.find({})
         print(session['type'])
         return render_template("mog.html", oglasi = offersResults, users = usersResults, products = productsResults)
@@ -101,7 +101,7 @@ def azurirajOglas(oglas_id):
                                 "kolicina" : float(request.form.get('kolicina')),
                                 "prijevoz" : request.form.get('prijevoz'),
                                 "proizvod" : request.form.get('proizvod'),
-                                "datumKupnje" : datetime.strptime(str(request.form.get('datumKupnje')), '%d.%m.%Y.'),
+                                "datumDostave" : datetime.strptime(str(request.form.get('datumDostave')), '%d.%m.%Y.'),
                             }
                             })
             flash('Uspješno ste ažurirali oglas!', 'success')
@@ -112,11 +112,8 @@ def azurirajOglas(oglas_id):
 
 @opg.route('/povijestProdaje')
 def povijestProdaje():
-    print("konj")
     if (session['type'] == 'opg'):
-        offersResults = oglasi.find({"kupljen" : True, "prodavatelj" : session['username']})
-        konj =  session['username']
-        print(session['brojNeprocitanih'])
+        offersResults = oglasi.find({"kupljen" : True, "prodavatelj" : session['korisnicko_ime']})
         return render_template("povijestProdaje.html", oglasi = offersResults)
     if (session['type'] == 'admin'):
         return redirect(url_for('admin.aktivniOglasi'))
@@ -125,7 +122,7 @@ def povijestProdaje():
 def prihvatiOglasCentra(oglas_id):
     if (session['type'] == 'opg'):
         oglas = list(oglasi.find({"_id" : ObjectId(oglas_id)}))
-        email = list(users.find({"username" : oglas[0]['objavio']}))
+        email = list(users.find({"korisnicko_ime" : oglas[0]['objavio']}))
         message = "Centar prihvatio je vas oglas za proizvod " + oglas[0]['proizvod'] +" Kolicina : " + str(oglas[0]['kolicina']) +" Cijena " + str(oglas[0]['cijena']) +" kn. Posaljite mu poruku preko sustava kako biste dogovorili detalje."
         server  = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
@@ -137,7 +134,7 @@ def prihvatiOglasCentra(oglas_id):
                             {
                                 "datumKupnje" : datetime.now(),
                                 "kupljen" : True,
-                                "prodavatelj" : session['username'],
+                                "prodavatelj" : session['korisnicko_ime'],
                                 "kupac_id" : oglas[0]['objavio']
                             }
                             })
@@ -156,7 +153,7 @@ def posaljiProtuponuduCentru(oglas_id):
                 "cijena" : float(request.form.get('cijena')),
                 "kolicina" : float(request.form.get('kolicina')),
                 "prijevoz" : request.form.get('prijevoz'),
-                "user_id" : session['username'],
+                "user_id" : session['korisnicko_ime'],
                 "odbijena" : False,
                 "prihvacena" : False
             })
@@ -242,7 +239,7 @@ def pretragaOglasa():
         productResults = products.find({})
         usersResults = users.find({})
         proizvod = request.get_data().decode('UTF-8')
-        protuponudeZaCentarRes = list(protuponudeZaCentar.find({"user_id" : session['username'], "odbijena" : False, "prihvacena" : False}, {"oglas_id":1, "_id":0}))
+        protuponudeZaCentarRes = list(protuponudeZaCentar.find({"user_id" : session['korisnicko_ime'], "odbijena" : False, "prihvacena" : False}, {"oglas_id":1, "_id":0}))
         for pr in protuponudeZaCentarRes:
             ogid = pr['oglas_id']
             ogid.replace("'","")
@@ -277,13 +274,13 @@ def pregledCentara():
         ocjena = []
         for centar in centri:
             ocjene['id'] = centar['_id']
-            ocjene['username'] = centar['username']
+            ocjene['korisnicko_ime'] = centar['korisnicko_ime']
             ukupnaOcjena = 0
             ocjene['avg'] = 0
             brojac = 0
-            brojOcjena = len(centar['ratings'])
+            brojOcjena = len(centar['ocjene'])
             kors = []
-            for x in centar['ratings']:
+            for x in centar['ocjene']:
                 if x != '': 
                     brojac = brojac + 1
                     ukupnaOcjena += x['rating']
@@ -291,12 +288,12 @@ def pregledCentara():
                     kors.append(x['user_id'])
                 else:
                     ocjene['avg'] = 'Nema ocjena za centar'
-            ukPos = oglasi.find({"kupljen" : True, "kupac_id" : centar['username'], "prodavatelj": session['username']}).count()
+            ukPos = oglasi.find({"kupljen" : True, "kupac_id" : centar['korisnicko_ime'], "prodavatelj": session['korisnicko_ime']}).count()
             ocjene['brojPoslova'] = ukPos
             ocjene['kors'] = kors
             ocjena.append(dict(ocjene))
         print(ocjena)
-        return render_template('pregledCentara.html', centri = centri, ja = session['username'], ocjene = ocjena)
+        return render_template('pregledCentara.html', centri = centri, ja = session['korisnicko_ime'], ocjene = ocjena)
 
 @opg.route('/ocjeniCentar/<string:centar_id>', methods=['GET', 'POST'])
 def ocjeniCentar(centar_id):
@@ -305,10 +302,10 @@ def ocjeniCentar(centar_id):
         if int(request.form.get('ocjena')) > 5 or int(request.form.get('ocjena')) < 1:
             flash('Ne smijete ocjeniti korisnika s tom ocjenom')
         else:
-            users.update_one({"username": user[0]['username']},
+            users.update_one({"korisnicko_ime": user[0]['korisnicko_ime']},
                                 {"$push": 
-                                    {"ratings" : 
-                                        {"user_id" : session['username'], "rating": int(request.form.get('ocjena'))}}})
+                                    {"ocjene" : 
+                                        {"user_id" : session['korisnicko_ime'], "rating": int(request.form.get('ocjena'))}}})
         return redirect(url_for('opg.pregledCentara'))
 
 @opg.route('/novaPoruka', methods=['GET', 'POST'])
@@ -330,8 +327,8 @@ def posaljiPoruku(centar):
       "$and" : [
                { 
                  "$or" : [ 
-                         {"primatelj" : session['username']},
-                         {"posiljatelj" : session['username']}
+                         {"primatelj" : session['korisnicko_ime']},
+                         {"posiljatelj" : session['korisnicko_ime']}
                        ]
                },
                  { 

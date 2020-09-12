@@ -12,10 +12,10 @@
         <label class="form-control-label" for="radnja">Pretraži po korisniku: </label>
         <select name="korisnik" class="form-control" name="korisnik" id="korisnik">
                 {% for korisnik in korisnici %}
-                    {% if kor == korisnik.username%}
-                        <option selected value="{{korisnik.username}}">{{korisnik.username}}</option>
+                    {% if kor == korisnik.korisnicko_ime%}
+                        <option selected value="{{korisnik.korisnicko_ime}}">{{korisnik.korisnicko_ime}}</option>
                     {% else %}
-                        <option value="{{korisnik.username}}">{{korisnik.username}}</option>
+                        <option value="{{korisnik.korisnicko_ime}}">{{korisnik.korisnicko_ime}}</option>
                     {% endif %}
                 {% endfor %}
         </select>

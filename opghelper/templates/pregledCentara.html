@@ -14,6 +14,7 @@
             </thead>
             <tbody>
                 {%for centar in centri %}
+                {% set jeOcijenjen = false %}
                 <div class="modal fade" id="ocjeniModal{{centar._id}}" tabindex="-1" role="dialog" aria-labelledby="ocjeniModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                       <div class="modal-content">
@@ -30,10 +31,11 @@
                               {% if ocjena.brojPoslova == 0 %}
                                   <strong> Ne možete ocjeniti centar jer nemate zajedničkih poslova</strong>
                               {% endif %}
-                              {% if ocjena.brojPoslova > 0 and session['username'] in ocjena.kors %}
+                              {% if ocjena.brojPoslova > 0 and session['korisnicko_ime'] in ocjena.kors %}
+                                  {% set jeOcijenjen = true %}
                                   <strong> Već ste ocjenili ovaj centar </strong>
                               {% endif %}
-                              {% if ocjena.brojPoslova > 0 and session['username'] not in ocjena.kors %}
+                              {% if ocjena.brojPoslova > 0 and session['korisnicko_ime'] not in ocjena.kors %}
                                   <p>Ocjenite centar ocjenom od 1 do 5</p>
                                   <p>{{centar._id}}</p>
                                   <input type="number" id="ocjena" name="ocjena">
@@ -44,24 +46,30 @@
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
                           {% for ocjena in ocjene %}
-                          {% if ocjena.id == centar._id and ocjena.brojPoslova == 0 %}
-                          {%else%}
-                          {% if ocjena.id == centar._id and ocjena.brojPoslova > 0 %}
-                              <input type="submit" class="btn btn-primary" id="down"><i class="fas fa-check"></i> Ocjeni centar </input>
-                          {% endif %}
-                      {% endif %}
-                      {% endfor %}
+                          {% if ocjena.id == centar._id %} 
+                            {% if ocjena.brojPoslova > 0 and session['korisnicko_ime'] not in ocjena.kors %}
+                              <input type="submit" class="btn btn-primary" id="down" value="Ocijeni centar">
+                            {% endif %}
+                          {% endif %} 
+<!-- 
+                            {% if ocjena.id == centar._id and ocjena.brojPoslova == 0 %}
+                              {%else%}
+                                {% if ocjena.id == centar._id and ocjena.brojPoslova > 0 and not jeOcijenjen %}
+                                    <input type="submit" class="btn btn-primary" id="down"><i class="fas fa-check"></i> Ocjeni centar </input>
+                                {% endif %}
+                            {% endif %} -->
+                          {% endfor %}
                         </div>
                       </div>
                     </form>
                     </div>
                   </div>
                     <tr>
-                        <td><img class="rounded-circle account-img" src="{{url_for('static', filename='images/' + centar.picture)}}"></td>
-                        <td>{{centar.username}}</td>
-                        <td>{{centar.adress.opcina}}, {{centar.adress.ulica}} {{centar.adress.kbr}}</td>
+                        <td><img class="rounded-circle account-img" src="{{url_for('static', filename='images/' + centar.slika)}}"></td>
+                        <td>{{centar.korisnicko_ime}}</td>
+                        <td>{{centar.adresa.opcina}}, {{centar.adresa.ulica}} {{centar.adresa.kbr}}</td>
                         {% for ocjena in ocjene %}
-                            {% if ocjena.username == centar.username %}
+                            {% if ocjena.korisnicko_ime == centar.korisnicko_ime %}
                                 <td>{{ocjena.brojPoslova}}</td>
                                 <td>{{ocjena.avg}}</td>
                             {%else%}
@@ -72,7 +80,7 @@
                                 <td>
                                     <button type="button" class="btn btn-secondary" id="uredi" data-toggle="modal" data-target="#ocjeniModal{{ centar._id }}">Ocjeni</button>
                                 </td>
-                        <td><a onclick="stisnut()" href="{{url_for('opg.posaljiPoruku', centar = centar.username)}}"> Pošalji poruku</a></td>
+                        <td><a onclick="stisnut()" href="{{url_for('opg.posaljiPoruku', centar = centar.korisnicko_ime)}}"> Pošalji poruku</a></td>
                     </tr>   
                 {% endfor %}
             </tbody>

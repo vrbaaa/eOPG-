@@ -1,5 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+    {% for category, message in messages %}
+        <div class="alert alert-{{category}}">
+            {{message}}
+        </div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
 <div class="row">
         {% for oglas in oglasi %}
             <div class="modal fade" id="izbrisiModal{{ oglas._id }}" tabindex="-1" role="dialog" aria-labelledby="izbrisiModalLabel" aria-hidden="true">
@@ -41,17 +50,17 @@
                                     <label class="form-control-label" for="proizvod">Proizvod: </label>
                                     <select name="proizvod" class="form-control" id="proizvod-{{oglas._id }}">
                                         {% for product in products %}
-                                            {% if oglas.proizvod == product.name %}
-                                                <option selected value="{{product.name}}">{{product.name}}</option>
+                                            {% if oglas.proizvod == product.naziv %}
+                                                <option selected value="{{product.naziv}}">{{product.naziv}}</option>
                                             {% else %}
-                                                <option value="{{product.name}}">{{product.name}}</option>
+                                                <option value="{{product.naziv}}">{{product.naziv}}</option>
                                             {% endif %}
                                         {% endfor %}
                                     </select>
                                     <label class="form-control-label" for="kolicina">Količina: </label>
                                     <input type="text" class="form-control" name="kolicina" id="kolicina" value="{{oglas.kolicina}}">
-                                    <label class="form-control-label" for="datumKupnje">Datum dostave: </label>
-                                    <input type="text" class="form-control" name="datumKupnje" id="datumKupnje" value="{{oglas.datumDostave.strftime('%d.%m.%Y.')}}">
+                                    <label class="form-control-label" for="datumDostave">Datum dostave: </label>
+                                    <input type="text" class="form-control" name="datumDostave" id="datumDostave" value="{{oglas.datumDostave.strftime('%d.%m.%Y.')}}">
                                     <label class="form-control-label" for="prijevoz">Prijevoz: </label> <br>
                                     {% if oglas.prijevoz == 'opg' %}
                                         <input type="radio" id="centar" name="prijevoz" value="centar">
@@ -68,21 +77,12 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
-                                <input type="submit" class="btn btn-success" value="Azuirraj">
+                                <input type="submit" class="btn btn-success" value="Ažuriraj">
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{category}}">
-                            {{message}}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
             <div class="col-lg-4 col-md-6 col-sm-12">
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">

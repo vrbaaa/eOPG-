@@ -51,17 +51,17 @@
                     <label class="form-control-label" for="proizvod">Proizvod: </label>
                     <select name="proizvod" class="form-control" id="proizvod-{{oglas._id }}">
                         {% for product in products %}
-                            {% if oglas.proizvod == product.name %}
-                                <option selected value="{{product.name}}">{{product.name}}</option>
+                            {% if oglas.proizvod == product.naziv %}
+                                <option selected value="{{product.naziv}}">{{product.naziv}}</option>
                             {% else %}
-                                <option value="{{product.name}}">{{product.name}}</option>
+                                <option value="{{product.naziv}}">{{product.naziv}}</option>
                             {% endif %}
                         {% endfor %}
                     </select>
                     <label class="form-control-label" for="kolicina">Količina: </label>
                     <input type="text" class="form-control" name="kolicina" id="kolicina" value="{{oglas.kolicina}}">
-                    <label class="form-control-label" for="datumKupnje">Datum dostave: </label>
-                    <input type="text" class="form-control" name="datumKupnje" id="datumKupnje" value="{{oglas.datumDostave.strftime('%d.%m.%Y.')}}">
+                    <label class="form-control-label" for="datumDostave">Datum dostave: </label>
+                    <input type="text" class="form-control" name="datumDostave" id="datumDostave" value="{{oglas.datumDostave.strftime('%d.%m.%Y.')}}">
                     <label class="form-control-label" for="prijevoz">Prijevoz: </label> <br>
                     {% if oglas.prijevoz == 'opg' %}
                         <input type="radio" id="centar" name="prijevoz" value="centar">

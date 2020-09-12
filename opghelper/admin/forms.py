@@ -4,7 +4,7 @@ from wtforms import StringField, SelectField, IntegerField, FloatField, RadioFie
 from wtforms.validators import DataRequired, Length, Email, ValidationError
 from opghelper import  mongo
 
-class AdressForm(FlaskForm):
+class adresaForm(FlaskForm):
     zupanija = SelectField('Županija', validators=[DataRequired()], choices=[], validate_choice=False)
     opcina = SelectField('Općina', validators=[DataRequired()], choices=[], validate_choice=False)
     mjesto = StringField('Mjesto', validators=[DataRequired()])
@@ -12,30 +12,30 @@ class AdressForm(FlaskForm):
     kbr =  StringField('Kućni broj', validators=[DataRequired()])
     
 class UserForm(FlaskForm):
-    username = StringField('Korisničko ime', validators=[DataRequired()])
+    korisnicko_ime = StringField('Korisničko ime', validators=[DataRequired()])
     password = PasswordField('Lozinka', validators=[DataRequired()])
     type = RadioField('Tip korisnika',  validators=[DataRequired()], choices=[('centar','Centar'), ('opg', 'Opg')])
     email = StringField('E-mail', validators=[DataRequired(), Email()])
     oib = StringField('OIB', validators=[DataRequired(), Length(min=13, max=13)])
-    adress = FormField(AdressForm)
-    picture = FileField('Profilna slika', validators=[FileAllowed(['jpg', 'png'])])
+    adresa = FormField(adresaForm)
+    slika = FileField('Profilna slika', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Napravi korisnika')   
-    def validate_username(self, username):
-        user = mongo.db.users.find_one({"username": username.data})
+    def validate_korisnicko_ime(self, korisnicko_ime):
+        user = mongo.db.korisnici.find_one({"korisnicko_ime": korisnicko_ime.data})
         if user:
             raise ValidationError("Korisničko ime već postoji")     
     def validate_email(self, email):
-        user = mongo.db.users.find_one({"email": email.data})
+        user = mongo.db.korisnici.find_one({"email": email.data})
         if user:
             raise ValidationError("Email ime već postoji")
         
 class ProductForm(FlaskForm):
-    name = StringField('Naziv proizvoda', validators=[DataRequired()])
-    photo = StringField('Slika proizvoda', validators=[DataRequired()])
-    type = RadioField('Vrsta proizvoda',  validators=[DataRequired()], choices=[('voće','Voće'), ('povrće', 'Povrće')])
+    naziv = StringField('Naziv proizvoda', validators=[DataRequired()])
+    slika = StringField('Slika proizvoda', validators=[DataRequired()])
+    tip = RadioField('Vrsta proizvoda',  validators=[DataRequired()], choices=[('voće','Voće'), ('povrće', 'Povrće')])
     
-    def validate_name(self, name):
-        product = mongo.db.products.find_one({"name": name.data})
+    def validate_name(self, naziv):
+        product = mongo.db.proizvodi.find_one({"naziv": naziv.data})
         if product:
             raise ValidationError("Ovaj proizvod već postoji")
         
@@ -59,8 +59,8 @@ class UserUpdateForm(FlaskForm):
     type = RadioField('Tip korisnika',  validators=[DataRequired()], choices=[('centar','Centar'), ('opg', 'Opg')])
     email = StringField('E-mail', validators=[DataRequired(), Email()])
     oib = StringField('OIB', validators=[DataRequired(), Length(min=13, max=13)])
-    adress = FormField(AdressForm)
-    picture = FileField('Profilna slika', validators=[FileAllowed(['jpg', 'png'])])
+    adresa = FormField(adresaForm)
+    slika = FileField('Profilna slika', validators=[FileAllowed(['jpg', 'png'])])
     blokiran = BooleanField('Blokiran')
     submit = SubmitField('Ažuriraj korisnika')     
     # def validate_email(self, email):

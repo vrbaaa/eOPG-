@@ -6,15 +6,15 @@
                     {% if proizvod == 'Svi proizvodi' %}
                         <option  selected value="Svi proizvodi">Svi proizvodi</option>
                         {% for product in products %}
-                            <option value="{{product.name}}">{{product.name}}</option>
+                            <option value="{{product.naziv}}">{{product.naziv}}</option>
                         {% endfor %}
                     {% else %}
                        <option value="Svi proizvodi">Svi proizvodi</option>
                         {% for product in products %}
-                            {% if proizvod == product.name%}
-                                <option selected value="{{product.name}}">{{product.name}}</option>
+                            {% if proizvod == product.naziv%}
+                                <option selected value="{{product.naziv}}">{{product.naziv}}</option>
                             {% else %}
-                                <option value="{{product.name}}">{{product.name}}</option>
+                                <option value="{{product.naziv}}">{{product.naziv}}</option>
                             {% endif %}
                         {% endfor %}
                     {% endif %}
@@ -25,7 +25,7 @@
                 {% else %}
                     <input type="number" name="cijena"id="cijena">
                 {% endif %}
-                <input type="submit">
+                <input type="submit" value="Pretraži">
             </form>
     <br>
         {% for offer in offers %}

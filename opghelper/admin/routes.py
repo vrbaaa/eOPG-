@@ -12,7 +12,7 @@ import os
 import secrets
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
-from opghelper.admin.forms import  UserForm, AdressForm, ProductForm, OglasForm,MessageForm, UserUpdateForm
+from opghelper.admin.forms import  UserForm, adresaForm, ProductForm, OglasForm,MessageForm, UserUpdateForm
 
 
 import randomcolor
@@ -21,9 +21,8 @@ import randomcolor
 import json
 from collections import Counter, defaultdict
 import requests
-users = mongo.db.users
-products = mongo.db.products
-offers = mongo.db.offers
+users = mongo.db.korisnici
+products = mongo.db.proizvodi
 protuponude = mongo.db.protuponude
 protuponudeZaCentar = mongo.db.protuponudeZaCentar
 oglasi = mongo.db.oglasi
@@ -39,7 +38,7 @@ def myFunc(e):
 def login_required(test):
     @wraps(test)
     def wrap(*args, **kwargs):
-        if 'username' in session:
+        if 'korisnicko_ime' in session:
             return test(*args, **kwargs)
         else:
             flash('Morate se prijaviti')
@@ -68,18 +67,18 @@ def indexOfElem(lst, key, value):
             return i
     return None
 
-def save_picture(form_picture):
+def save_slika(form_slika):
     random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/images', picture_fn)
+    _, f_ext = os.path.splitext(form_slika.filename)
+    slika_fn = random_hex + f_ext
+    slika_path = os.path.join(app.root_path, 'static/images', slika_fn)
 
     output_size = (125, 125)
-    i = Image.open(form_picture)
+    i = Image.open(form_slika)
     i.thumbnail(output_size)
-    i.save(picture_path)
+    i.save(slika_path)
 
-    return picture_fn
+    return slika_fn
 
 @admin.route('/admin_dodaj_korisnika', methods=['GET', 'POST'])
 def admin_dodaj_korisnika():
@@ -87,25 +86,27 @@ def admin_dodaj_korisnika():
         req = requests.get('https://tehcon.com.hr/api/CroatiaTownAPI/list.php')
         data = json.loads(req.content)
         form = UserForm()
-        form.adress.zupanija.choices = [(x['name'], x['name']) for x in data['counties']]
+        form.adresa.zupanija.choices = [(x['name'], x['name']) for x in data['counties']]
         if form.validate_on_submit():
-            if form.picture.data:
-                picture_file = save_picture(form.picture.data)
+            if form.slika.data:
+                slika_file = save_slika(form.slika.data)
             else:
-                picture_file = '238880ae0bcd486c.png'
+                slika_file = '238880ae0bcd486c.png'
             users.insert_one({
-                "username" : form.username.data,
+                "korisnicko_ime" : form.korisnicko_ime.data,
                 "password" : form.password.data,
                 "type" : form.type.data,
                 "email" : form.email.data,
                 "oib" : form.oib.data,
-                "adress" : form.adress.data,
+                "adresa" : form.adresa.data,
                 "datumIVrijemeKreiranja" : datetime.now(),
-                "picture" : picture_file,
-                "ratings" : []
+                "slika" : slika_file,
+                "ocjene" : [],
+                "jeZahtjev" : False,
+                "blokiran": False
             })
             print(form.errors)
-            flash('Objavili ste uspješno novi oglas!', 'success')
+            flash('Unijeli ste uspješno novog korisnika!', 'success')
             return redirect(url_for('admin.admin_popis_korisnika'))
         print(form.errors)
         return render_template("admin_dodaj_korisnika.html", form=form)
@@ -134,19 +135,42 @@ def opcina(zupanija):
 @admin.route('/admin_popis_korisnika')
 @login_required
 def admin_popis_korisnika():
-        centri = list(users.find({"type" : {"$ne" : "admin"}}))
+        centri = list(users.find(
+            { "$and": 
+                 [
+                    { 
+                        "$or" :
+                        [ 
+                            {
+                                "jeZahtjev" : False
+                            },
+                            {
+                               "$and" : 
+                                   [
+                                        {"jeZahtjev" : True},
+                                        {"prihvacen" : True}
+                                    ]
+                            }
+                        ]
+                    }, 
+                    { 
+                        "type" : {"$ne" : "admin"}
+                    }
+                 ]
+            }))
+                         
         ocjene = {}
         ocjena = []
         try: 
             for centar in centri:
                 useri = []
                 ocjene['id'] = centar['_id']
-                ocjene['username'] = centar['username']
+                ocjene['korisnicko_ime'] = centar['korisnicko_ime']
                 ukupnaOcjena = 0
                 ocjene['avg'] = 0
                 brojac = 0
-                brojOcjena = len(centar['ratings'])
-                for x in centar['ratings']:
+                brojOcjena = len(centar['ocjene'])
+                for x in centar['ocjene']:
                     if x != '': 
                         brojac = brojac + 1
                         ukupnaOcjena += x['rating']
@@ -160,7 +184,7 @@ def admin_popis_korisnika():
             print(ex)
         print(ocjena)
         print(centri)
-        return render_template ('admin_popis_korisnika.html',centri = centri, ja = session['username'], ocjene = ocjena)
+        return render_template ('admin_popis_korisnika.html',centri = centri, ja = session['korisnicko_ime'], ocjene = ocjena)
 
 @admin.route('/admin_proizvodi', methods=['GET', 'POST'])
 def admin_proizvodi():
@@ -179,9 +203,9 @@ def admin_proizvodi():
             kupljeniProizvodi.append(p['_id'])
         if form.validate_on_submit():
             products.insert_one({
-                "name" : form.name.data,
-                "type": form.type.data,
-                "photo": form.photo.data
+                "naziv" : form.naziv.data,
+                "tip": form.tip.data,
+                "slika": form.slika.data
             })
             
             flash ('Dodali ste novi proizvod', 'success')
@@ -195,9 +219,9 @@ def pr():
     form = ProductForm()
     if form.validate_on_submit():
             products.insert_one({
-                "name" : form.name.data,
-                "type": form.type.data,
-                "photo" : form.photo.data
+                "naziv" : form.naziv.data,
+                "tip": form.tip.data,
+                "slika" : form.slika.data
             })
             flash ('Dodali ste novi proizvod', 'success')
             return render_template('proizvodi.html', form=form)
@@ -209,9 +233,9 @@ def json_proizvodi():
         for p in products.find():
             jsonOutput.append({
                     "id" : str(ObjectId(p['_id'])),
-                    "name" : p['name'],
-                    "type" : p['type'], 
-                    "photo" : p['photo'], 
+                    "naziv" : p['naziv'],
+                    "tip" : p['tip'], 
+                    "slika" : p['slika'], 
                     "total" : 0                
                 })
         producti = list(oglasi.aggregate([
@@ -221,8 +245,8 @@ def json_proizvodi():
                             ]))
         for pr in producti:
             for p in jsonOutput:
-                if (pr['_id'] == p['name']):
-                    ind = indexOfElem(jsonOutput, 'name', p['name'])
+                if (pr['_id'] == p['naziv']):
+                    ind = indexOfElem(jsonOutput, 'naziv', p['naziv'])
                     jsonOutput[ind]['total'] = pr['total']
         jsonOutput.sort(reverse=True, key=myFunc)
         return jsonify({'result' : jsonOutput})
@@ -230,35 +254,35 @@ def json_proizvodi():
         
 @admin.route('/proizvodi', methods=['POST'])
 def dodaj_proizvod():
-    name = request.json['name']
-    type = request.json['type']
-    photo = request.json['photo']
+    naziv = request.json['naziv']
+    tip = request.json['tip']
+    slika = request.json['slika']
         
-    proizvod_id = products.insert({"name" : name, "type" : type, "photo" : photo})  
+    proizvod_id = products.insert({"naziv" : naziv, "tip" : tip, "slika" : slika})  
     novi_proizvod = products.find_one({"_id" : proizvod_id})
         
-    output = {'name' : novi_proizvod['name'], 'type' : novi_proizvod['type']}
+    output = {'naziv' : novi_proizvod['naziv'], 'tip' : novi_proizvod['tip']}
         
     return jsonify({'result' : output})
 
-@admin.route('/proizvodi/<string:name>', methods=['PUT'])
-def azuriraj_proizvod(name):
-    az_proizvod = products.update_one({"name" : name},
+@admin.route('/proizvodi/<string:naziv>', methods=['PUT'])
+def azuriraj_proizvod(naziv):
+    az_proizvod = products.update_one({"naziv" : naziv},
                                    {"$set" : {
-                                       "name" :  request.json['name'],
-                                       "type" :  request.json['type'],
-                                       "photo" :  request.json['photo'],
+                                       "naziv" :  request.json['naziv'],
+                                       "tip" :  request.json['tip'],
+                                       "slika" :  request.json['slika'],
                                    }})
     
-    novi_proizvod = products.find_one({"name" : request.json['name']})
+    novi_proizvod = products.find_one({"naziv" : request.json['naziv']})
     
-    output = {'name' : novi_proizvod['name'], 'type' : novi_proizvod['type']}
+    output = {'naziv' : novi_proizvod['naziv'], 'tip' : novi_proizvod['tip']}
     
     return jsonify({'result' : output})
 
-@admin.route('/proizvodi/<string:name>', methods=['DELETE'])
-def obrisi_proizvod(name):
-    products.delete_one({"name" : name})
+@admin.route('/proizvodi/<string:naziv>', methods=['DELETE'])
+def obrisi_proizvod(naziv):
+    products.delete_one({"naziv" : naziv})
     
     return redirect(url_for('admin.json_proizvodi'))
 
@@ -269,9 +293,9 @@ def uredi_proizvod(pid):
             products.update_one({"_id" : ObjectId(pid)}, 
                             {"$set" :
                             {
-                                "name" : request.form.get('name'),
-                                "type" : request.form.get('vrsta'),
-                                "photo" : request.form.get('photo'),
+                                "naziv" : request.form.get('naziv'),
+                                "tip" : request.form.get('vrsta'),
+                                "slika" : request.form.get('slika'),
                             }
                             })
             flash('Uspješno ste ažurirali proizvod!', 'success')
@@ -413,11 +437,11 @@ def admin_search_radnja():
 def admin_dodaj_oglas():
         form = OglasForm()
         tip = []
-        form.proizvod.choices = [(proizvod['name'], proizvod['name']) for proizvod in products.find({})]
-        form.objavio.choices = [(kor['username'], kor['username']) for kor in users.find({"type": {"$ne" : "admin"}})]
+        form.proizvod.choices = [(proizvod['naziv'], proizvod['naziv']) for proizvod in products.find({})]
+        form.objavio.choices = [(kor['korisnicko_ime'], kor['korisnicko_ime']) for kor in users.find({"type": {"$ne" : "admin"}})]
         print(form.errors)
         if form.validate_on_submit():    
-            objavioArray = list(users.find({"username" : form.objavio.data}, {"type" : 1, "_id" : 0}))
+            objavioArray = list(users.find({"korisnicko_ime" : form.objavio.data}, {"type" : 1, "_id" : 0}))
             for a in objavioArray:
                 tip.append(a['type'])    
             oglasi.insert_one({
@@ -436,8 +460,8 @@ def admin_dodaj_oglas():
             flash('Objavili ste uspješno novi oglas!', 'success')
             # ogl = oglasi.distinct("objavio", {"kupljen" : False, "tipObjavio" : "opg", "proizvod" : form.proizvod.data, "kolicina" : {"$lte" : form.kolicina.data}})
             # for og in ogl:
-            #     us = list(users.find({"username" : og}))
-            #     message = "Centar " + session['username'] + "je objavio oglas za proizvod " + form.proizvod.data +" Kolicina : " + str(form.proizvod.data) +" Cijena " + str(form.cijena.data) +" kn. Posaljite mu poruku preko sustava i dogovorite kupnju proizvoda."
+            #     us = list(users.find({"korisnicko_ime" : og}))
+            #     message = "Centar " + session['korisnicko_ime'] + "je objavio oglas za proizvod " + form.proizvod.data +" Kolicina : " + str(form.proizvod.data) +" Cijena " + str(form.cijena.data) +" kn. Posaljite mu poruku preko sustava i dogovorite kupnju proizvoda."
             #     msg = message.encode('utf-8')
             #     server  = smtplib.SMTP("smtp.gmail.com", 587)
             #     server.starttls()
@@ -456,8 +480,8 @@ def posaljiPoruku(korisnik):
       "$and" : [
                { 
                  "$or" : [ 
-                         {"primatelj" : session['username']},
-                         {"posiljatelj" : session['username']}
+                         {"primatelj" : session['korisnicko_ime']},
+                         {"posiljatelj" : session['korisnicko_ime']}
                        ]
                },
                  { 
@@ -472,26 +496,20 @@ def posaljiPoruku(korisnik):
 
 @admin.route('/zahtijevi')
 def zahtijevi():
-    zaht = list(zahtjevi.find({"odbijen": False, "prihvacen" : False}))
+    zaht = list(users.find({"jeZahtjev": True, "prihvacen" : False, "odbijen": False}))
     session['brojZahtjeva'] = len(zaht)
     return render_template('zahtjevi.html', zahtjevi = zaht)
 
 @admin.route('/prihvatiZahtjev/<string:zahtjev_id>', methods=['GET', 'POST'])
 def prihvatiZahtjev(zahtjev_id):
-    zaht = zahtjevi.find_one({"_id" : ObjectId(zahtjev_id)})
-    zahtjevi.update_one({"_id" : ObjectId(zahtjev_id)}, {"$set" : {"prihvacen" : True}})
+    zaht = users.find_one({"_id" : ObjectId(zahtjev_id)})
     lozinka = getPassword(5,3)
-    users.insert_one({
-            "username" : zaht['username'],
-            "password" : lozinka,
-            "type" : zaht['type'],
-            "email" : zaht['email'],
-            "oib" : zaht['oib'],
-            "adress" : zaht['adress'],
-            "datumIVrijemeKreiranja" : datetime.now(),
-            "ratings" : []
-        })
-    
+    users.update_one({"_id" : ObjectId(zahtjev_id)}, 
+                     {"$set" : 
+                         {"prihvacen" : True,
+                        "password" : lozinka,
+                        "blokiran" : False
+                        }})
     message = "Vaš zahtjev za izradom korisničko računa na aplikaciji eOPG je odobren. Vaša lozinka je " + lozinka + ". Sada možete koristit sustav" 
     msg = message.encode('utf-8')
     server  = smtplib.SMTP("smtp.gmail.com", 587)
@@ -502,61 +520,61 @@ def prihvatiZahtjev(zahtjev_id):
 
 @admin.route('/odbijZahtjev/<string:zahtjev_id>', methods=['GET', 'POST'])
 def odbijZahtjev(zahtjev_id):
-    zahtjevi.update_one({"_id" : ObjectId(zahtjev_id)}, {"$set" : {"odbijen" : True}})
+    users.update_one({"_id" : ObjectId(zahtjev_id)}, {"$set" : {"odbijen" : True}})
     return redirect(url_for('admin.zahtijevi'))
 
 @admin.route('/racun/<string:user>', methods=['GET', 'POST'])
 def racun(user):
     form = UserUpdateForm()
     trenutni_korisnik = users.find_one({"_id" : ObjectId(user)})
-    username= trenutni_korisnik['username']
-    ovaopcina = trenutni_korisnik['adress']['opcina']
+    korisnicko_ime= trenutni_korisnik['korisnicko_ime']
+    ovaopcina = trenutni_korisnik['adresa']['opcina']
     print(form.errors)
     if form.validate_on_submit():
-        if form.picture.data:
-            picture = save_picture(form.picture.data)
+        if form.slika.data:
+            slika = save_slika(form.slika.data)
         else:
-            picture = trenutni_korisnik['picture']
+            slika = trenutni_korisnik['slika']
         users.update_one({"_id" : ObjectId(user)},
                           {"$set" : 
                               { "type" : form.type.data,
                                 "email" : form.email.data,
                                 "oib" : form.oib.data,
-                                "adress" : form.adress.data,
+                                "adresa" : form.adresa.data,
                                 "datumIVrijemeAzuriranja" : datetime.now(),
-                                "picture" : picture,
+                                "slika" : slika,
                                 "blokiran" : form.blokiran.data
                               }
                             }
                           )
         print(form.errors)
-        flash('Objavili ste uspješno novi oglas!', 'success')
+        flash('Kreirali ste uspješno novog korisnika!', 'success')
         return redirect(url_for('admin.admin_popis_korisnika'))
-    print(trenutni_korisnik['adress']['zupanija'])
+    print(trenutni_korisnik['adresa']['zupanija'])
     form.type.data = trenutni_korisnik['type']
     form.email.data = trenutni_korisnik['email']
     form.oib.data = trenutni_korisnik['oib']
     req = requests.get('https://tehcon.com.hr/api/CroatiaTownAPI/list.php')
     data = json.loads(req.content)
-    form.adress.zupanija.process_data(trenutni_korisnik['adress']['zupanija'].upper())
-    form.adress.zupanija.choices = [(x['name'], x['name']) for x in data['counties']]
-    # form.adress.opcina.process_data(trenutni_korisnik['adress']['opcina'])
-        # form.adress.opcina.choices = [(x['name'], x['name']) for x in getOpcine(trenutni_korisnik['adress']['zupanija'].upper())]
-        # form.adress.zupanija.data = trenutni_korisnik['adress']['zupanija']
-        # form.adress.opcina.data = trenutni_korisnik['adress']['opcina']
-    form.adress.mjesto.data = trenutni_korisnik['adress']['mjesto']
-    form.adress.ulica.data = trenutni_korisnik['adress']['ulica']
-    form.adress.kbr.data = trenutni_korisnik['adress']['kbr']
-    if trenutni_korisnik['picture']:
-        image_file = url_for('static', filename='images/' + trenutni_korisnik['picture'])
+    form.adresa.zupanija.process_data(trenutni_korisnik['adresa']['zupanija'].upper())
+    form.adresa.zupanija.choices = [(x['name'], x['name']) for x in data['counties']]
+    # form.adresa.opcina.process_data(trenutni_korisnik['adresa']['opcina'])
+        # form.adresa.opcina.choices = [(x['name'], x['name']) for x in getOpcine(trenutni_korisnik['adresa']['zupanija'].upper())]
+        # form.adresa.zupanija.data = trenutni_korisnik['adresa']['zupanija']
+        # form.adresa.opcina.data = trenutni_korisnik['adresa']['opcina']
+    form.adresa.mjesto.data = trenutni_korisnik['adresa']['mjesto']
+    form.adresa.ulica.data = trenutni_korisnik['adresa']['ulica']
+    form.adresa.kbr.data = trenutni_korisnik['adresa']['kbr']
+    if trenutni_korisnik['slika']:
+        image_file = url_for('static', filename='images/' + trenutni_korisnik['slika'])
     else:
         image_file = None
     print(form.errors)
-    return render_template('racun.html', form = form, username = username, ovaopcina = ovaopcina, image_file=image_file)
+    return render_template('racun.html', form = form, korisnicko_ime = korisnicko_ime, ovaopcina = ovaopcina, image_file=image_file)
     
 @admin.route('/admin_povijestProdaje')
 def admin_povijestProdaje():
-    korisnici = users.find({"type" : "centar"}, {"username" : 1, "_id" : 0})
+    korisnici = users.find({"type" : "centar"}, {"korisnicko_ime" : 1, "_id" : 0})
     oglasiResults = oglasi.find({"kupljen" : True})
     proizvod = 'Svi proizvodi'
     korisnik = 'Svi korisnici'
@@ -570,7 +588,7 @@ def povSearch():
         pro = 'Svi proizvodi'
         kor = 'Svi korisnici'        
         proizvodi = products.find({})
-        korisnici = users.find({"type" : "centar"}, {"username" : 1, "_id" : 0})
+        korisnici = users.find({"type" : "centar"}, {"korisnicko_ime" : 1, "_id" : 0})
         proizvod = request.args.get('proizvod')
         korisnik = request.args.get('korisnik')
         if proizvod == 'Svi proizvodi' and korisnik != 'Svi korisnici':  
@@ -578,7 +596,7 @@ def povSearch():
         elif proizvod != 'Svi proizvodi' and korisnik != 'Svi korisnici':
             oglasiResults = oglasi.find({"kupac_id" : korisnik, "proizvod" : proizvod})
         elif  proizvod != 'Svi proizvodi' and korisnik == 'Svi korisnici':
-            oglasiResults = oglasi.find({"proizvod" : proizvod})
+            oglasiResults = oglasi.find({"proizvod" : proizvod, "kupljen" : True})
         elif proizvod == 'Svi proizvodi' and korisnik == 'Svi korisnici':
             oglasiResults = oglasi.find({"kupljen" : True})
         return render_template('admin_povijestProdaje.html', oglasi = oglasiResults, proizvodi = proizvodi, korisnici = korisnici, pro = proizvod, kor = korisnik)

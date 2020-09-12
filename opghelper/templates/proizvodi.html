@@ -14,42 +14,42 @@
             {{form.csrf_token}}
             <fieldset class="form-group">
                 <div class="form-group">
-                    {{ form.name.label(class="form-control-label") }}
-                    {% if form.name.errors %}
-                        {{ form.name(class="form-control is-invalid") }}
+                    {{ form.naziv.label(class="form-control-label") }}
+                    {% if form.naziv.errors %}
+                        {{ form.naziv(class="form-control is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form.name.errors %}
+                            {% for error in form.naziv.errors %}
                                 <span>{{error}}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.name(class="form-control ") }}
+                        {{ form.naziv(class="form-control ") }}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                   {{ form.type.label(class="form-control-label") }}
-                   {% if form.type.errors %}
-                   {{ form.type(class="form-control is-invalid") }}
+                   {{ form.tip.label(class="form-control-label") }}
+                   {% if form.tip.errors %}
+                   {{ form.tip(class="form-control is-invalid") }}
                    <div class="invalid-feedback">
-                       {% for error in form.type.errors %}
+                       {% for error in form.tip.errors %}
                            <span>{{error}}</span>
                        {% endfor %}
                    </div>
                {% else %}
-                   {{ form.type(class="form-control ") }}
+                   {{ form.tip(class="form-control ") }}
                {% endif %}
                </div>
                <div class="form-group">
-                {{ form.photo.label(class="form-control-label") }}
-                {% if form.photo.errors %}
-                    {{ form.photo(class="form-control is-invalid") }}
+                {{ form.slika.label(class="form-control-label") }}
+                {% if form.slika.errors %}
+                    {{ form.slika(class="form-control is-invalid") }}
                     <div class="invalid-feedback">
-                        {% for error in form.photo.errors %}
+                        {% for error in form.slika.errors %}
                             <span>{{error}}</span>
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.photo(class="form-control ") }}
+                    {{ form.slika(class="form-control ") }}
                 {% endif %}
             </div>
         </div>
@@ -101,7 +101,7 @@
                         <fieldset class="form-group">  
                             <div class="form-group">
                                 <label for="naziv" class="form-control-label">Naziv: </label> <br>
-                                <input type="text" class="form-control" name="name" id="name${res.name}" value="${res.name}">
+                                <input type="text" class="form-control" name="naziv" id="name${res.naziv}" value="${res.naziv}">
                             </div>
                             <div class="form-group">
                                 <label class="form-control-label" for="vrsta">Vrsta: </label> <br>
@@ -115,8 +115,8 @@
                                     <label for="voće">voće</label><br>`}
                         </div>
                         <div class="form-group">
-                            <label for="photo" class="form-control-label">Slika: </label> <br>
-                            <input type="text" class="form-control" name="photo" id="photo" value="${res.photo}">
+                            <label for="slika" class="form-control-label">Slika: </label> <br>
+                            <input type="text" class="form-control" name="slika" id="photo" value="${res.slika}">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -129,9 +129,9 @@
             </div>`;
             var tr = document.createElement('tr');
             tr.innerHTML = 
-            '<td>' + res.name + '</td>' +
-            '<td>' + res.type + '</td>' +
-            '<td> <img src=' + res.photo + ' class="proizvod" alt=""></td>' +
+            '<td>' + res.naziv + '</td>' +
+            '<td>' + res.tip + '</td>' +
+            '<td> <img src=' + res.slika + ' class="proizvod" alt=""></td>' +
             '<td>' + res.total + '</td>' +
             '<td>' + '<button type="button" class="btn btn-primary" id="uredi" data-toggle="modal" data-target="#urediModal' 
             + res.id + '"' + '>Uredi proizvod</button></td>';

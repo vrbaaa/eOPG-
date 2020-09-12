@@ -16,7 +16,7 @@ document.getElementById('sidebarCollapse').addEventListener('click', function ()
         document.getElementById('main').style.width = "90%";
     }
 });
-// var psad = document.getElementById('send_to_username').placeholder;
+// var psad = document.getElementById('send_to_korisnicko_ime').placeholder;
 // psad = encodeURIComponent(psad.trim());
 // console.log(psad);
 // if (window.location.pathname == '/posaljiPoruku/'+psad){
@@ -36,7 +36,7 @@ private_socket.on('pokazi', function(msg) {
 
             today = dd + '.' + mm + '.' + yyyy;
     if (window.location.pathname.includes('/posaljiPoruku/')){
-        var pr = document.getElementById('send_to_username').placeholder;
+        var pr = document.getElementById('send_to_korisnicko_ime').placeholder;
         if (msg['posiljatelj'] ==  pr) {
             
             var mojDiv = document.getElementById('nov');
@@ -122,7 +122,7 @@ document.getElementById('posalji').onclick = function() {
     var yyyy = today.getFullYear();
 
     today = dd + '.' + mm + '.' + yyyy;
-    var pr = document.getElementById('send_to_username').placeholder;
+    var pr = document.getElementById('send_to_korisnicko_ime').placeholder;
     var poruka = document.getElementById('poruka').value;
     var posiljatelj = document.getElementById('imeKorisnika').innerHTML;
 
@@ -141,7 +141,7 @@ document.getElementById('posalji').onclick = function() {
     mojDrugi.append(h2, h5, p);
     mojDiv.append(mojDrugi);
     document.getElementById('poruka').value = '';
-    private_socket.emit('private_message', {'username' : pr, 'poruka' : poruka, 'posiljatelj' : posiljatelj});
+    private_socket.emit('private_message', {'korisnicko_ime' : pr, 'poruka' : poruka, 'posiljatelj' : posiljatelj});
 }
 if (window.location.pathname.includes('/posaljiPoruku')){
     console.log('Delam');

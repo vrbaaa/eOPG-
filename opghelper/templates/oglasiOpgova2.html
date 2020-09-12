@@ -5,7 +5,7 @@
             <select name="proizvod" class="form-control" id="proizvod" onchange="chan()">
                 <option selected value="sviProizvodi">Svi proizvodi</option>
                 {% for product in products %}
-                <option value="{{product.name}}">{{product.name}}</option>
+                <option value="{{product.naziv}}">{{product.naziv}}</option>
                 {% endfor %}
             </select>
         </div>

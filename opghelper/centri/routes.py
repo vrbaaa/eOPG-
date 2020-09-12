@@ -11,8 +11,8 @@ from flask_socketio import SocketIO, send, emit
 import json
 import requests
 
-users = mongo.db.users
-products = mongo.db.products
+users = mongo.db.korisnici
+products = mongo.db.proizvodi
 offers = mongo.db.offers
 protuponude = mongo.db.protuponude
 poruke = mongo.db.poruke
@@ -23,7 +23,7 @@ def upisiUDnevnik(radnja):
     if (session['type'] != 'admin'):
         dnevnik.insert_one(
                             {
-                                "korisnik" : session['username'],
+                                "korisnik" : session['korisnicko_ime'],
                                 "radnja" : radnja,
                                 "vrijeme" : datetime.now()
                             }
@@ -68,8 +68,8 @@ def prihvatiOglas(oglas_id):
     if (session['type'] == 'centar'):
         upisiUDnevnik("Prihvaćanje oglasa")
         oglas = list(oglasi.find({"_id" : ObjectId(oglas_id)}))
-        email = list(users.find({"username" : oglas[0]['objavio']}))
-        message = f"Centar " + session['username'] + " prihvatio je vas oglas " + oglas[0]['naziv'] + " za proizvod " + oglas[0]['proizvod'] +" Kolicina : " + str(oglas[0]['kolicina']) +" Cijena " + str(oglas[0]['cijena']) +" kn. Posaljite mu poruku preko sustava kako biste dogovorili detalje."
+        email = list(users.find({"korisnicko_ime" : oglas[0]['objavio']}))
+        message = f"Centar " + session['korisnicko_ime'] + " prihvatio je vas oglas " + oglas[0]['naziv'] + " za proizvod " + oglas[0]['proizvod'] +" Kolicina : " + str(oglas[0]['kolicina']) +" Cijena " + str(oglas[0]['cijena']) +" kn. Posaljite mu poruku preko sustava kako biste dogovorili detalje."
         server  = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login("opg.aplikacija@gmail.com", "ZavrsniRadFoi2020")
@@ -79,7 +79,8 @@ def prihvatiOglas(oglas_id):
                             {
                                 "datumKupnje" : datetime.now(),
                                 "kupljen" : True,
-                                "kupac_id" : session['username']
+                                "kupac_id" : session['korisnicko_ime'],
+                                "prodavatelj" : oglas[0]['objavio']
                             }
                             })
         return redirect(url_for('centri.povijestKupnje'))
@@ -89,7 +90,7 @@ def prihvatiOglas(oglas_id):
 @centri.route('/povijestKupnje')
 def povijestKupnje():
     if (session['type'] == 'centar'):
-        oglasResults = oglasi.find({"kupljen" : True, "kupac_id" : session['username']})
+        oglasResults = oglasi.find({"kupljen" : True, "kupac_id" : session['korisnicko_ime']})
         return render_template("povijestKupnje.html", oglasi = oglasResults)
     
 @centri.route('/posaljiProtuponudu/<string:oglas_id>', methods=['GET', 'POST'])
@@ -102,7 +103,7 @@ def posaljiProtuponudu(oglas_id):
                 "cijena" : float(request.form.get('wantedPrice')),
                 "kolicina" : float(request.form.get('quantity')),
                 "prijevoz" : request.form.get('transport'),
-                "user_id" : session['username'],
+                "user_id" : session['korisnicko_ime'],
                 "odbijena" : False,
                 "prihvacena" : False
             })
@@ -143,7 +144,7 @@ def prihvatiProtuponuduCentar(protuponudaZaCentar_id):
                         "kolicina" : float(protuponudaZaUpdate[0]['kolicina']),
                         "zatvoren" : True,
                         "kupljen" : True,
-                        "kupac_id" : session['username'],
+                        "kupac_id" : session['korisnicko_ime'],
                         "prodavatelj" : protuponudaZaUpdate[0]['user_id'],
                         "datumKupnje" : datetime.now()
                     }
@@ -166,7 +167,7 @@ def prihvatiProtuponuduCentar(protuponudaZaCentar_id):
                 "kolicina" : float(protuponudaZaUpdate[0]['kolicina']),
                 "proizvod" : oglasZaUpdate[0]['proizvod'],
                 "prijevoz" : protuponudaZaUpdate[0]['prijevoz'],
-                "kupac_id" : session['username'],
+                "kupac_id" : session['korisnicko_ime'],
                 "prodavatelj" : protuponudaZaUpdate[0]['user_id'],
                 "zatvoren" : True,
                 "kupljen" :  True,
@@ -185,11 +186,11 @@ def dodajOglasCentar():
     if (session['type'] == 'centar'):
         upisiUDnevnik("Dodavanje novog oglasa")
         form = OglasForm()
-        form.proizvod.choices = [(proizvod['name'], proizvod['name']) for proizvod in products.find({})]
+        form.proizvod.choices = [(proizvod['naziv'], proizvod['naziv']) for proizvod in products.find({})]
         print(form.errors)
         if form.validate_on_submit():
             oglasi.insert_one({
-                "objavio" : session['username'],
+                "objavio" : session['korisnicko_ime'],
                 "naziv" : form.naziv.data,
                 "cijena" : form.cijena.data,
                 "kolicina" : form.kolicina.data,
@@ -204,8 +205,8 @@ def dodajOglasCentar():
             flash('Objavili ste uspješno novi oglas!', 'success')
             ogl = oglasi.distinct("objavio", {"kupljen" : False, "tipObjavio" : "opg", "proizvod" : form.proizvod.data, "kolicina" : {"$lte" : form.kolicina.data}})
             for og in ogl:
-                us = list(users.find({"username" : og}))
-                message = "Centar " + session['username'] + "je objavio oglas za proizvod " + form.proizvod.data +" Kolicina : " + str(form.proizvod.data) +" Cijena " + str(form.cijena.data) +" kn. Posaljite mu poruku preko sustava i dogovorite kupnju proizvoda."
+                us = list(users.find({"korisnicko_ime" : og}))
+                message = "Centar " + session['korisnicko_ime'] + "je objavio oglas za proizvod " + form.proizvod.data +" Kolicina : " + str(form.proizvod.data) +" Cijena " + str(form.cijena.data) +" kn. Posaljite mu poruku preko sustava i dogovorite kupnju proizvoda."
                 msg = message.encode('utf-8')
                 server  = smtplib.SMTP("smtp.gmail.com", 587)
                 server.starttls()
@@ -227,7 +228,7 @@ def obrisiOglas(oglas_id):
 @centri.route('/mojiOglasiCentar')
 def mojiOglasiCentar():
     if (session['type'] == 'centar'):
-        oglasResults = list(oglasi.find({"objavio" : session['username'], "kupljen" : False}))
+        oglasResults = list(oglasi.find({"objavio" : session['korisnicko_ime'], "kupljen" : False}))
         productsResults = list(products.find({}))
         usersResults = users.find({})
         
@@ -246,7 +247,7 @@ def azurirajOglasCentar(oglas_id):
                                 "kolicina" : float(request.form.get('kolicina')),
                                 "prijevoz" : request.form.get('prijevoz'),
                                 "proizvod" : request.form.get('proizvod'),
-                                "datumKupnje" : datetime.strptime(str(request.form.get('datumKupnje')), '%d.%m.%Y.'),
+                                "datumDostave" : datetime.strptime(str(request.form.get('datumDostave')), '%d.%m.%Y.'),
                             }
                             })
             flash('Uspješno ste ažurirali oglas!', 'success')
@@ -255,13 +256,13 @@ def azurirajOglasCentar(oglas_id):
 @centri.route('/profilCentar')
 def profilCentar():
     if (session['type'] == 'centar'):
-        res = users.find_one({"username": session['username']})
-        uk = len(res['ratings'])
+        res = users.find_one({"korisnicko_ime": session['korisnicko_ime']})
+        uk = len(res['ocjene'])
         ukupnaOcjena = 0
-        for x in res['ratings']:
+        for x in res['ocjene']:
             ukupnaOcjena += x['rating']
         prosjek = ukupnaOcjena / uk
-        kupnja = oglasi.find({"centar_id" : session['username']})
+        kupnja = oglasi.find({"centar_id" : session['korisnicko_ime']})
         for x in kupnja:
             print(x)
         return render_template("profilCentar.html", user = res, prosjek = prosjek)
@@ -276,12 +277,12 @@ def pregledOpgova():
             for centar in centri:
                 useri = []
                 ocjene['id'] = centar['_id']
-                ocjene['username'] = centar['username']
+                ocjene['korisnicko_ime'] = centar['korisnicko_ime']
                 ukupnaOcjena = 0
                 ocjene['avg'] = 0
                 brojac = 0
-                brojOcjena = len(centar['ratings'])
-                for x in centar['ratings']:
+                brojOcjena = len(centar['ocjene'])
+                for x in centar['ocjene']:
                     if x != '': 
                         brojac = brojac + 1
                         ukupnaOcjena += x['rating']
@@ -289,14 +290,14 @@ def pregledOpgova():
                         useri.append(x['user_id'])
                     else:
                         ocjene['avg'] = 'Nema ocjena za opg'
-                ukPos = oglasi.find({"kupljen" : True, "prodavatelj" : centar['username'], "kupac_id": session['username']}).count()
+                ukPos = oglasi.find({"kupljen" : True, "prodavatelj" : centar['korisnicko_ime'], "kupac_id": session['korisnicko_ime']}).count()
                 ocjene['brojPoslova'] = ukPos
                 ocjene['useri'] = useri
                 ocjena.append(dict(ocjene))
         except Exception as ex: 
             print(ex)
         print(ocjena)
-        return render_template('pregledOpgova.html', centri = centri, ja = session['username'], ocjene = ocjena)
+        return render_template('pregledOpgova.html', centri = centri, ja = session['korisnicko_ime'], ocjene = ocjena)
 
 @centri.route('/ocijeniOpg/<string:opg_id>', methods=['GET', 'POST'])
 def ocijeniOpg(opg_id):
@@ -304,10 +305,10 @@ def ocijeniOpg(opg_id):
         if int(request.form.get('ocjena')) > 5 or int(request.form.get('ocjena')) < 1:
             flash('Ne smijete ocjeniti korisnika s tom ocjenom')
         else:
-            users.update_one({"username": user[0]['username']},
+            users.update_one({"korisnicko_ime": user[0]['korisnicko_ime']},
                                 {"$push": 
-                                    {"ratings" : 
-                                        {"user_id" : session['username'], "rating": int(request.form.get('ocjena'))}}})
+                                    {"ocjene" : 
+                                        {"user_id" : session['korisnicko_ime'], "rating": int(request.form.get('ocjena'))}}})
         if (session['type'] == 'centar'):
             return redirect(url_for('centri.pregledOpgova'))
         if (session['type'] == 'admin'):
@@ -323,23 +324,23 @@ def handleMessage(msg):
 
 @io.on('private_message', namespace='/private')
 def private_message(input):
-    if input['username'] in korisnici:
+    if input['korisnicko_ime'] in korisnici:
         try:
-            primatelj_session_id = korisnici[input['username']]
+            primatelj_session_id = korisnici[input['korisnicko_ime']]
         except Exception as inst: 
             print(type(inst))
             print(inst.args)
             print(inst)
         poruka = input['poruka']
         #upisiUDnevnik("Slanje poruke")
-        por_id = poruke.insert({"posiljatelj" : input['posiljatelj'], "primatelj" : input['username'],
+        por_id = poruke.insert({"posiljatelj" : input['posiljatelj'], "primatelj" : input['korisnicko_ime'],
                                      "poruka" : input['poruka'], "datum_slanja" : datetime.now(), "procitana" : False})
         nova_poruka = poruke.find_one({"_id" : ObjectId(por_id)})
         por_id = str(nova_poruka['_id'])
         emit('pokazi', {'por_id' : por_id, 'poruka' : poruka, 'posiljatelj' : input['posiljatelj']}, room=primatelj_session_id)
     else: 
         poruke.insert_one({
-            "posiljatelj" : input['posiljatelj'], "primatelj" : input['username'],
+            "posiljatelj" : input['posiljatelj'], "primatelj" : input['korisnicko_ime'],
             "poruka" : input['poruka'], "datum_slanja" : datetime.now(),
             "procitana" : False})
 
@@ -393,8 +394,8 @@ def posaljiPoruku(opg):
       "$and" : [
                { 
                  "$or" : [ 
-                         {"primatelj" : session['username']},
-                         {"posiljatelj" : session['username']}
+                         {"primatelj" : session['korisnicko_ime']},
+                         {"posiljatelj" : session['korisnicko_ime']}
                        ]
                },
                  { 

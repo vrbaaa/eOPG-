@@ -3,19 +3,19 @@
         <div class="container">
             <form method=POST action="" enctype="multipart/form-data" id="forma">
                 {{form.csrf_token}}
-                {{form.adress.csrf_token}}
+                {{form.adresa.csrf_token}}
                 <fieldset class="form-group">
                     <div class="form-group">
-                        {{ form.username.label(class="form-control-label") }}
-                        {% if form.username.errors %}
-                            {{ form.username(class="form-control is-invalid") }}
+                        {{ form.korisnicko_ime.label(class="form-control-label") }}
+                        {% if form.korisnicko_ime.errors %}
+                            {{ form.korisnicko_ime(class="form-control is-invalid") }}
                             <div class="invalid-feedback">
-                                {% for error in form.username.errors %}
+                                {% for error in form.korisnicko_ime.errors %}
                                     <span>{{error}}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            {{ form.username(class="form-control ") }}
+                            {{ form.korisnicko_ime(class="form-control ") }}
                         {% endif %}
                     </div>
                     <div class="form-group">
@@ -62,57 +62,57 @@
                     {% endif %}
                     </div>
                      <div class="form-group">
-                        {{ form.adress.zupanija.label(class="form-control-label") }}
-                        {{ form.adress.zupanija(class="form-control", id="zupanija") }}
+                        {{ form.adresa.zupanija.label(class="form-control-label") }}
+                        {{ form.adresa.zupanija(class="form-control", id="zupanija") }}
                     </div>
                     <div class="form-group">
-                        {{ form.adress.opcina.label(class="form-control-label") }}
-                        {{ form.adress.opcina(class="form-control", id="opcina") }}
+                        {{ form.adresa.opcina.label(class="form-control-label") }}
+                        {{ form.adresa.opcina(class="form-control", id="opcina") }}
                     </div>
                     <div class="form-group">
-                        {{ form.adress.mjesto.label(class="form-control-label") }}
-                        {% if form.adress.mjesto.errors %}
-                            {{ form.adress.mjesto(class="form-control is-invalid") }}
+                        {{ form.adresa.mjesto.label(class="form-control-label") }}
+                        {% if form.adresa.mjesto.errors %}
+                            {{ form.adresa.mjesto(class="form-control is-invalid") }}
                             <div class="invalid-feedback">
                                 {% for error in form.mjesto.errors %}
                                     <span>{{error}}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            {{ form.adress.mjesto(class="form-control ") }}
+                            {{ form.adresa.mjesto(class="form-control ") }}
                         {% endif %}
                     </div>
                     <div class="form-group">
-                        {{ form.adress.ulica.label(class="form-control-label") }}
-                        {% if form.adress.ulica.errors %}
-                            {{ form.adress.ulica(class="form-control is-invalid") }}
+                        {{ form.adresa.ulica.label(class="form-control-label") }}
+                        {% if form.adresa.ulica.errors %}
+                            {{ form.adresa.ulica(class="form-control is-invalid") }}
                             <div class="invalid-feedback">
-                                {% for error in form.adress.ulica.errors %}
+                                {% for error in form.adresa.ulica.errors %}
                                     <span>{{error}}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            {{ form.adress.ulica(class="form-control ") }}
+                            {{ form.adresa.ulica(class="form-control ") }}
                         {% endif %}
                     </div>
                     <div class="form-group">
-                        {{ form.adress.kbr.label(class="form-control-label") }}
-                        {% if form.adress.kbr.errors %}
-                            {{ form.adress.kbr(class="form-control is-invalid") }}
+                        {{ form.adresa.kbr.label(class="form-control-label") }}
+                        {% if form.adresa.kbr.errors %}
+                            {{ form.adresa.kbr(class="form-control is-invalid") }}
                             <div class="invalid-feedback">
-                                {% for error in form.adress.kbr.errors %}
+                                {% for error in form.adresa.kbr.errors %}
                                     <span>{{error}}</span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            {{ form.adress.kbr(class="form-control ") }}
+                            {{ form.adresa.kbr(class="form-control ") }}
                         {% endif %}
                     </div>
                     <div class="form-group">
-                        {{ form.picture.label() }}
-                        {{ form.picture(class="form-control-file", id="file") }}
-                        {% if form.picture.errors %}
-                            {% for error in form.picture.errors %}
+                        {{ form.slika.label() }}
+                        {{ form.slika(class="form-control-file", id="file") }}
+                        {% if form.slika.errors %}
+                            {% for error in form.slika.errors %}
                                 <span class="text-danger">{{ error }}</span></br>
                             {% endfor %}
                         {% endif %}

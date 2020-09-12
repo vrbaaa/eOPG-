@@ -18,15 +18,15 @@
                       {% endfor %}
                   {% endif %}
                 {% endwith %}
-                {% if form.username.errors %}
-                    {{ form.username(id="login", class="fadeIn second", placeholder="Korisničko ime") }}
+                {% if form.korisnicko_ime.errors %}
+                    {{ form.korisnicko_ime(id="login", class="fadeIn second", placeholder="Korisničko ime") }}
                     <div class="invalid-feedback">
-                        {% for error in form.username.errors %}
+                        {% for error in form.korisnicko_ime.errors %}
                             <span>{{error}}</span>
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ form.username(id="login", class="fadeIn second",  placeholder="Korisničko ime") }}
+                    {{ form.korisnicko_ime(id="login", class="fadeIn second",  placeholder="Korisničko ime") }}
                 {% endif %}
 
                 {% if form.password.errors %}
